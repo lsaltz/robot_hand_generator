@@ -118,3 +118,6 @@ Assuming that you have started and are in the docker container the follow is the
 - Fix the test code to work with the recent updates.
 - Create instruction specific for wslg
 - Create instructions for non-docker install
+
+## Additional Notes:
+I will be taking over and making changes to this project. Updates coming soon. Unless otherwise specified, the code belongs to the original creators. Any changes made will be detailed by me.
