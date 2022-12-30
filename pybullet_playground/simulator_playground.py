@@ -26,9 +26,8 @@ class sim_tester():
         self.gripper_loc = gripper_loc
         
         self.directory = os.path.dirname(__file__)
-
-
-    def main(self):
+        
+    def main(self): #include linkCount0, linkCount1, pass from combination function in main incorporate during implementation for now it is static
         """Run the simulator."""           
         physicsClient = p.connect(p.GUI)  # or p.DIRECT for non-graphical version
         p.setAdditionalSearchPath(pybullet_data.getDataPath())  # optionally
