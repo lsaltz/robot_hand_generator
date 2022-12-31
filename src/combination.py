@@ -127,7 +127,7 @@ class crossoverFunctions:
         child = self.update_dictionaries(finger0, finger1, num)
         child.objects.object_qty = 0
         print("child_" + child.hand.hand_name)
-        with open('../test/{0}.json'.format("child_"+child.hand.hand_name+"_gen_"+generation), mode = "w") as f:
+        with open('../hand_json_files/hand_queue_json/{0}.json'.format("child_"+str(child.hand.hand_name)+"_gen_"+str(generation)), mode = "w") as f:
             new_json = json.dumps(child, indent=4)
             f.write(new_json)
             f.close()

@@ -101,7 +101,7 @@ def mutate(mutationsNum, max_segments, generation):
         robot_gripper.objects.object_qty = 0
 
         robot_gripper.update()
-        with open('../test/' + file_name + '.json', mode="w") as jfile:        
+        with open('../hand_json_files/hand_queue_json/' + file_name + '.json', mode="w") as jfile:        
             new_json = ""
             new_json += json.dumps(robot_gripper, indent=4)
                 
