@@ -5,10 +5,7 @@ import copy
 import numpy as np
 import os
 import json
-import shutil
-import pandas as pd
 from addict import Dict
-from collections import ChainMap
 
 class crossoverFunctions:
 

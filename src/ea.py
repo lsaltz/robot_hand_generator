@@ -4,7 +4,6 @@ import random
 import numpy as np
 import os
 import json
-import shutil
 import mutations
 from addict import Dict
 import combination
@@ -17,11 +16,12 @@ combine = combination.crossoverFunctions()
 finger_0 = "finger_0"
 finger_1 = "finger_1"
 mutateTimes = 5
-gen = 10
+
 max_segs = 10
 fitness = []
 ext = ('.json')
-
+print("Please input the integer number of generations you would like to run this for: ")
+gen = input()
 for num in range(gen):
 
     mutations.mutate(mutateTimes, max_segs, gen)
@@ -142,7 +142,7 @@ for num in range(gen):
     
 print("The fittest of them all is: ", str(fittestFirst))
 print("Runner up is: ", str(secondFittest))
-   
+
 """
 1. generate mutated files
 2. test each mutated file
