@@ -15,6 +15,7 @@ WSL is currently the only tested method for executing this program.
 
 
 1. Run the following commands:
+
     First, update your machine:
     
     ```console
@@ -40,14 +41,20 @@ WSL is currently the only tested method for executing this program.
     ~/software/blender-2.93/2.93/python/bin/python3.9 -m pip install upgrade pip;\
     ~/software/blender-2.93/2.93/python/bin/python3.9 -m pip install numpy;\
     ~/software/blender-2.93/2.93/python/bin/python3.9 -m pip install pathlib;\
-    cd ~/robot_hand_generator/; python3 first_run.py 0 ~/software/blender-2.93/blender;\
+    cd ~/robot_hand_generator_MLS/; python3 first_run.py 0 ~/software/blender-2.93/blender;\
     '
     ```
 
     * This will set up the environment.
     
-2. To run the evolutionary algorithm, run:
+2. To run the evolutionary algorithm, open:
 
+    ```console
+    cd ~/robot_hand_generator_MLS/src/
+    ```
+   
+   And run:
+    
     ```console
     python3 ea.py
     ```
