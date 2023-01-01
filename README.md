@@ -15,6 +15,7 @@ WSL is currently the only tested method for executing this program.
 
 
 1. Run the following commands:
+
     First, update your machine:
     
     ```console
