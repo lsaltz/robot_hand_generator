@@ -87,7 +87,7 @@ I am currently working on a feature that will enable you to view and test this f
 
 ## Todo:
 
-- Add basic_load.py
+- Add basic_load.py that allows user to visualize results
 - Add performance visualization using matplotlib
 - Update instructions and documentation
 
