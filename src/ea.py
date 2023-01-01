@@ -21,7 +21,7 @@ max_segs = 10
 fitness = []
 ext = ('.json')
 print("Please input the integer number of generations you would like to run this for: ")
-gen = input()
+gen = int(input())
 for num in range(gen):
 
     mutations.mutate(mutateTimes, max_segs, gen)
