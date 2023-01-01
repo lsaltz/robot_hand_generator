@@ -41,7 +41,7 @@ WSL is currently the only tested method for executing this program.
     ~/software/blender-2.93/2.93/python/bin/python3.9 -m pip install upgrade pip;\
     ~/software/blender-2.93/2.93/python/bin/python3.9 -m pip install numpy;\
     ~/software/blender-2.93/2.93/python/bin/python3.9 -m pip install pathlib;\
-    cd ~/robot_hand_generator/; python3 first_run.py 0 ~/software/blender-2.93/blender;\
+    cd ~/robot_hand_generator_MLS/; python3 first_run.py 0 ~/software/blender-2.93/blender;\
     '
     ```
 
