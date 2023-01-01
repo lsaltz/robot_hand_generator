@@ -35,8 +35,6 @@ for num in range(gen):
     directory = os.getcwd()
 
     file_content = testing.read_json("./../src/.user_info.json")
-    hand_names = []
-    grippers = []
     file_name = []
     fitness = []
 
@@ -51,16 +49,10 @@ for num in range(gen):
                 hand_loc = root
                 print("hand_loc: ", hand_loc)
                 sim_test = testing.sim_tester(hand_name, hand_loc)
-                
+                file_name.append(hand_name + ".json")
                 startTime = time.time()
                 fitness.append(sim_test.main(startTime))
                 print("Fitness for " + str(hand_name) + " is: " + str(fitness[-1]))
-
-
-    dirname = "../hand_json_files/hand_archive_json/"
-    for x in os.listdir(dirname):    
-        if x.endswith(ext):     
-            file_name.append(x)
     
     print("file_name: ", file_name)
     print("fitness: ", fitness)
@@ -104,13 +96,6 @@ for num in range(gen):
     directory = os.getcwd()
 
     file_content = testing.read_json("./../src/.user_info.json")
-    folders = []
-    hand_names = []
-    grippers = []
-    fitness = []
-    file_name = []
-
-#return everything in a tuple
 
     folder = os.path.dirname("../output/")
     
@@ -124,29 +109,24 @@ for num in range(gen):
                 print("hand_loc: ", hand_loc)
                 sim_test = testing.sim_tester(hand_name, hand_loc)
         
-        
+                file_name.append(hand_name + ".json")
                 startTime = time.time()
                 fitness.append(sim_test.main(startTime))
                 print("Fitness for " + str(hand_name) + " is: " + str(fitness[-1]))
-
-    dirname = "../hand_json_files/hand_archive_json/"
-    for x in os.listdir(dirname):    
-        if x.endswith(ext):     
-            file_name.append(x)        
+         
     scoring = np.array(list(zip(fitness, file_name)))
     columnIndex = 0
     sortedScoring = scoring[scoring[:,0].astype(int).argsort()]
 
     fittestFirst = sortedScoring[-1][1]
     secondFittest = sortedScoring[-2][1]
-    
+    print(sortedScoring)
 print("The fittest of them all is: ", str(fittestFirst))
 print("Runner up is: ", str(secondFittest))
 
 """
-1. generate mutated files
-2. test each mutated file
-3. take highest 2 scores from mutated files and combine by returning the fitness scores as a list
-4. test combined files
-5. repeat
+1. move first fittest from json archive to json queue
+2. open with pybullet basic_load
+3. visualize sortedScoring and scoring with matplotlib
+4. add function that removes all other files and cleans up
 """
