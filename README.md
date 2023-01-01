@@ -47,8 +47,14 @@ WSL is currently the only tested method for executing this program.
 
     * This will set up the environment.
     
-2. To run the evolutionary algorithm, run:
+2. To run the evolutionary algorithm, open:
 
+    ```console
+    cd ~/robot_hand_generator_MLS/src/
+    ```
+   
+   And run:
+    
     ```console
     python3 ea.py
     ```
