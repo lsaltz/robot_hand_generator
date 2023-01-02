@@ -138,7 +138,7 @@ os.rename(old_location, new_location)
 for root, dirs, files in os.walk(clearing_path):
     for file in files:
         os.remove(os.path.join(root, file))
-cd ..
+
 
 main.MainScript() 
 for root, dirs, files in os.walk(clearing_path):
