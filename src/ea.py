@@ -85,8 +85,8 @@ for num in range(gen):
     crossover0_0, crossover1_0 = combine.segment_count_comparator(par0, par1, count_0_0, count_1_0, finger_0)
     crossover0_1, crossover1_1 = combine.segment_count_comparator(par0, par1, count_0_1, count_1_1, finger_1)
 
-    combine.write_to_json(crossover0_0, crossover0_1, 0, gen)
-    combine.write_to_json(crossover1_0, crossover1_1, 1, gen)
+    combine.write_to_json(crossover0_0, crossover0_1, 0)
+    combine.write_to_json(crossover1_0, crossover1_1, 1)
     
     main.MainScript()
     
