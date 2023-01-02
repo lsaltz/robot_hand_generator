@@ -18,7 +18,7 @@ def mutate(mutationsNum, max_segments, generation):
         segment_count_1 = np.random.randint(1, max_segments)
         segment_count_2 = np.random.randint(1, max_segments)
 
-        robot_gripper.hand.hand_name = "hand_" + str(i)
+        robot_gripper.hand.hand_name = file_name
         robot_gripper.hand.palm.palm_style = "cuboid"
         robot_gripper.hand.palm.palm_dimensions = 0.032, 0.075, 0.053
         robot_gripper.hand.palm.finger_qty = 2

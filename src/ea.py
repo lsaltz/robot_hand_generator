@@ -12,6 +12,7 @@ import glob
 import time
 import main
 from pathlib import Path
+import basic_load
 combine = combination.crossoverFunctions()
 finger_0 = "finger_0"
 finger_1 = "finger_1"
@@ -53,7 +54,7 @@ for num in range(gen):
                 startTime = time.time()
                 fitness.append(sim_test.main(startTime))
                 print("Fitness for " + str(hand_name) + " is: " + str(fitness[-1]))
-    
+            
     print("file_name: ", file_name)
     print("fitness: ", fitness)
     
@@ -120,10 +121,43 @@ for num in range(gen):
 
     fittestFirst = sortedScoring[-1][1]
     secondFittest = sortedScoring[-2][1]
+    
     print(sortedScoring)
+
 print("The fittest of them all is: ", str(fittestFirst))
 print("Runner up is: ", str(secondFittest))
 
+clearing_path = "../output/"
+
+old_location = "../hand_json_files/hand_archive_json/" + str(fittestFirst)
+new_location = "../hand_json_files/hand_queue_json/" + str(fittestFirst)
+
+os.rename(old_location, new_location)
+
+
+for root, dirs, files in os.walk(clearing_path):
+    for file in files:
+        os.remove(os.path.join(root, file))
+
+
+main.MainScript() 
+for root, dirs, files in os.walk(clearing_path):
+    for file in files:
+        if file.endswith('.urdf'):
+            hand_name = os.path.basename(file)
+
+            hand_loc = root
+            
+            fittest_file = os.path.join(root, hand_name)
+
+with open("../results.txt", mode="w") as resultsFile:
+    resultsFile.write("The fittest of them all is: ", str(fittestFirst))
+    resultsFile.write("Location is: ", root)
+    resultsFile.write("Runner up is: ", str(secondFittest))
+    resultsFile.write("Overall results are: ", str(sortedScoring))
+    resultsFile.close()
+basic_load.load(fittest_file)
+#YOU NEED TO OUTPUT THE DATA TO A FILE ON WHICH FILE IS FITTEST
 """
 1. move first fittest from json archive to json queue
 2. open with pybullet basic_load

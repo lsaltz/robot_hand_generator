@@ -34,7 +34,7 @@ class crossoverFunctions:
 
     def new_dictionary(self, num):
         dictionary = Dict()
-        dictionary.hand.hand_name = "child_hand_" + str(num)
+        dictionary.hand.hand_name = "child_hand_" + str(num)+"_gen_"+str(generation)
         dictionary.hand.palm.palm_style = "cuboid"
         dictionary.hand.palm.palm_dimensions = 0.032, 0.075, 0.053
         dictionary.hand.palm.finger_qty = 2
