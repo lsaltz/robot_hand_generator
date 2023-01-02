@@ -138,7 +138,7 @@ os.rename(old_location, new_location)
 for root, dirs, files in os.walk(clearing_path):
     for file in files:
         os.remove(os.path.join(root, file))
-
+cd ..
 
 main.MainScript() 
 for root, dirs, files in os.walk(clearing_path):
@@ -151,16 +151,10 @@ for root, dirs, files in os.walk(clearing_path):
             fittest_file = os.path.join(root, hand_name)
 
 with open("../results.txt", mode="w") as resultsFile:
-    resultsFile.write("The fittest of them all is: ", str(fittestFirst))
-    resultsFile.write("Location is: ", root)
-    resultsFile.write("Runner up is: ", str(secondFittest))
-    resultsFile.write("Overall results are: ", str(sortedScoring))
+    resultsFile.write("The fittest of them all is: " + str(fittestFirst))
+    resultsFile.write("Location is: " + str(root))
+    resultsFile.write("Runner up is: " + str(secondFittest))
+    resultsFile.write("Overall results are: " + str(sortedScoring))
     resultsFile.close()
+
 basic_load.load(fittest_file)
-#YOU NEED TO OUTPUT THE DATA TO A FILE ON WHICH FILE IS FITTEST
-"""
-1. move first fittest from json archive to json queue
-2. open with pybullet basic_load
-3. visualize sortedScoring and scoring with matplotlib
-4. add function that removes all other files and cleans up
-"""
