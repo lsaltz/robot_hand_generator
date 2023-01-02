@@ -9,9 +9,9 @@ from addict import Dict
 
 class crossoverFunctions:
 
-    def __init__(self):
+    def __init__(self, generation):
         self.dictionary = Dict()
-        
+        self.generation = generation
         
     def json_to_dictionaries(self, jfile):
         with open(jfile, mode="r") as parentfile:
@@ -34,7 +34,7 @@ class crossoverFunctions:
 
     def new_dictionary(self, num):
         dictionary = Dict()
-        dictionary.hand.hand_name = "child_hand_" + str(num)+"_gen_"+str(generation)
+        dictionary.hand.hand_name = "child_hand_" + str(num) + "_gen_" + str(self.generation)
         dictionary.hand.palm.palm_style = "cuboid"
         dictionary.hand.palm.palm_dimensions = 0.032, 0.075, 0.053
         dictionary.hand.palm.finger_qty = 2
@@ -120,11 +120,11 @@ class crossoverFunctions:
         
         
 
-    def write_to_json(self, finger0, finger1, num, generation):
+    def write_to_json(self, finger0, finger1, num):
         child = self.update_dictionaries(finger0, finger1, num)
         child.objects.object_qty = 0
         print("child_" + child.hand.hand_name)
-        with open('../hand_json_files/hand_queue_json/{0}.json'.format("child_"+str(child.hand.hand_name)+"_gen_"+str(generation)), mode = "w") as f:
+        with open('../hand_json_files/hand_queue_json/{0}.json'.format("child_"+str(child.hand.hand_name)), mode = "w") as f:
             new_json = json.dumps(child, indent=4)
             f.write(new_json)
             f.close()

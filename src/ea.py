@@ -13,7 +13,7 @@ import time
 import main
 from pathlib import Path
 import basic_load
-combine = combination.crossoverFunctions()
+
 finger_0 = "finger_0"
 finger_1 = "finger_1"
 mutateTimes = 5
@@ -24,7 +24,7 @@ ext = ('.json')
 print("Please input the integer number of generations you would like to run this for: ")
 gen = int(input())
 for num in range(gen):
-
+    combine = combination.crossoverFunctions(gen)
     mutations.mutate(mutateTimes, max_segs, gen)
     
     main.MainScript()   
