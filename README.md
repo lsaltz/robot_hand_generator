@@ -81,8 +81,8 @@ WSL is currently the only tested method for executing this program.
    
 ## What the outputs mean:
 
-After ea.py finishes running, it will give you the names of the two json files that performed the best in the console. 
-I am currently working on a feature that will enable you to view and test this file manually.
+After ea.py finishes running, it will send all the data it gathered to a text file called "results.txt" located in ~/robot_hand_generator_MLS.
+It will also automatically open the fittest file in the simulation for the user to view and test. 
 
 
 ## Todo:
