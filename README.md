@@ -87,10 +87,8 @@ It will also automatically open the fittest file in the simulation for the user 
 
 ## Todo:
 
-- Add "clean up" function
-- Add basic_load.py that allows user to visualize results
-- Add performance visualization using matplotlib
-- Update instructions and documentation
+- Add performance visualization with matplotlib
+- Update documentation
 
 ## Additional Notes:
 This project was originally created by Josh Campbell, and has been adjusted by me. The original repository can be found at:
