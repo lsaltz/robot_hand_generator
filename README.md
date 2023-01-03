@@ -114,7 +114,6 @@ It will also write the results to a file:
 - Add self collision and controls to output
 - Add size constraints to segments
 - Generate different object of different sizes
-- Figure out why it is not storing all data
 
 ## Additional Notes:
 This project was originally created by Josh Campbell, and has been adjusted by me. The original repository can be found at:
