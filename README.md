@@ -110,7 +110,6 @@ It will also write the results to a file:
 ## Todo:
 
 - Add performance visualization with matplotlib
-- Add comments
 - Add self collision and controls to output
 - Add size constraints to segments
 - Generate different object of different sizes
