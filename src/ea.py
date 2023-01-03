@@ -24,8 +24,8 @@ ext = ('.json')
 print("Please input the integer number of generations you would like to run this for: ")
 gen = int(input())  #generations ea runs for
 for num in range(gen):  #run the script for num generations
-    combine = combination.crossoverFunctions(gen)
-    mutations.mutate(mutateTimes, max_segs, gen)
+    combine = combination.crossoverFunctions(num)
+    mutations.mutate(mutateTimes, max_segs, num)
     
     main.MainScript()   
 

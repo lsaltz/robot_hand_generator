@@ -26,6 +26,11 @@ class sim_tester():
         self.directory = os.path.dirname(__file__)
  
 
+    """
+    This runs the simulation, opens the gripper urdf into the simulation, generates a sphere, 
+    measures the fitness score based off contact made at two points, and generates new spheres at random positions
+    if one gets knocked to far away for the gripper to reach.
+    """
     def main(self, start):
         executionTime = 0
          

@@ -6,6 +6,9 @@ import os
 import json
 from addict import Dict
 
+"""
+This file mutates the segment amount and size, creating mutated files.
+"""
 
 def mutate(mutationsNum, max_segments, generation):
     robot_gripper = Dict()

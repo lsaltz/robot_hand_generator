@@ -13,6 +13,10 @@ class crossoverFunctions:
         self.dictionary = Dict()
         self.generation = generation
         
+    """
+    This converts the json files to dictionaries, and takes in an argument
+    of the json file.
+    """
     def json_to_dictionaries(self, jfile):
         with open(jfile, mode="r") as parentfile:
             dictionary = json.load(parentfile)
@@ -20,18 +24,19 @@ class crossoverFunctions:
             parentfile.close()
         print("parent dictionaries created")
         return parent
-    #turns one json file into one dictionary, returns that dictionary
 
-
+    """
+    This counts the segments and takes a dictionary as an argument It returns two segments counts: one for each finger.
+    """
     def segment_counter(self, parent):
         segment_countF0 = parent.hand.finger_0.segment_qty
         segment_countF1 = parent.hand.finger_1.segment_qty
         print("segments counted...")
         return segment_countF0, segment_countF1
-    #counts segments in one finger-- returns segment count of that one finger
     
-
-
+    """
+    This sets up a new dictionary for the children.
+    """
     def new_dictionary(self, num):
         dictionary = Dict()
         dictionary.hand.hand_name = "child_hand_" + str(num) + "_gen_" + str(self.generation)
@@ -56,6 +61,10 @@ class crossoverFunctions:
         print("new dictionary created")
         return dictionary
         
+    """
+    If the two segments have an equal count, then one child has 0 segments on one finger, 
+    and on the other the segments are swapped.
+    """
     def equivalent_fingers(self, parent1, parent2, finger, segment_count):
     #if a==b c1 = 0 segments and c0 = swapped segments
         c0 = Dict()
@@ -68,6 +77,9 @@ class crossoverFunctions:
             c0.hand[finger][segment_name] = parent2.hand[finger][segment_name]
         return c0, c1
 
+    """
+    If one finger has more segments, this takes the difference from the finger with more segments.
+    """
     def difference(self, lesser_parent, greater_parent, lesser_segments, greater_segments, finger):
         difference_child = self.new_dictionary(1)
         difference_child = copy.deepcopy(greater_parent)
@@ -80,7 +92,9 @@ class crossoverFunctions:
             difference_child.hand[finger].pop(segment_name)
         return difference_child
         
-        
+    """
+    This combines the leftovers after the difference is taken from the greater finger.
+    """        
     def leftovers(self, lesser_parent, greater_parent, lesser_segments, greater_segments, finger):
         
         leftovers_child = self.new_dictionary(0)
@@ -95,7 +109,9 @@ class crossoverFunctions:
         return leftovers_child
     
            
-        
+    """
+    This compares the segments on each finger, and runs the above functions based on those comparisons.
+    """                
     def segment_count_comparator(self, a, b, a_segments, b_segments, finger):
         
         if a_segments > b_segments:
@@ -108,7 +124,10 @@ class crossoverFunctions:
             child0, child1 = self.equivalent_fingers(a, b, finger, a_segments)
         print("segments compared and new dictionary for each finger is created.")
         return child0, child1
-        
+
+    """
+    This updates the dictionaries with the new information.
+    """                
     def update_dictionaries(self, finger0, finger1, num):
         new = self.new_dictionary(num)
         finger0.hand.finger_1 = copy.deepcopy(finger1.hand.finger_1)
@@ -119,7 +138,9 @@ class crossoverFunctions:
         return new
         
         
-
+    """
+    This converts the dictionaries to json files.
+    """  
     def write_to_json(self, finger0, finger1, num):
         child = self.update_dictionaries(finger0, finger1, num)
         child.objects.object_qty = 0
@@ -128,6 +149,3 @@ class crossoverFunctions:
             new_json = json.dumps(child, indent=4)
             f.write(new_json)
             f.close()
-        
-    def destructor(self):   #called at end of operations
-        del self

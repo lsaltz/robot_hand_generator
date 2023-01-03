@@ -1,3 +1,5 @@
+#Adapted from its original by Marshall Saltz
+
 import pybullet as p
 import pybullet_data
 import pathlib
