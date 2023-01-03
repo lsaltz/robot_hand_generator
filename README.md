@@ -5,7 +5,7 @@ A tool used to generate the best hand design to pick up and hold onto a sphere.
 ## Requirements:
 
 - Blender 2.93 (only version tested on possibly will work on newer versions)
-- linux os (tested on ubuntu) or WSL with ubuntu
+- Linux os or WSL with ubuntu
 - PyBullet for simple visaulization and joint checking
 - Python 3.6+
 
@@ -82,13 +82,39 @@ WSL is currently the only tested method for executing this program.
 ## What the outputs mean:
 
 After ea.py finishes running, it will send all the data it gathered to a text file called "results.txt" located in ~/robot_hand_generator_MLS.
-It will also automatically open the fittest file in the simulation for the user to view and test. 
+It will also automatically open the fittest file in the simulation for the user to view and test.
 
+If you run the program in GUI mode, you will get hands such as:
+
+![Strange Grasper 0](/imgs/weirdhand0.png?raw=true "Strange Hand")
+
+![Strange Grasper 1](/imgs/weirdhand1.png?raw=true "Strange Hand")
+
+![Strange Grasper 2](/imgs/weirdhand2.png?raw=true "Strange Hand")
+
+These hands are doing their best to grasp the ball. Eventually, after testing multiple generated hands, it should
+settle on one of the original graspers or one of their children:
+
+![Test_Hand](/imgs/first_test_hand.png?raw=true "Winning Grasper")
+
+![Test_Hand Grasp](/imgs/grasp.png?raw=true "Winning Grasper Grasping")
+
+It will display the winning hand in PyBullet for the user to test themselves:
+
+![Output Hand](/imgs/output.png?raw=true "Winning Grasper Test")
+
+It will also write the results to a file:
+
+![Results](/imgs/results.png?raw=true "Results")
 
 ## Todo:
 
 - Add performance visualization with matplotlib
-- Update documentation
+- Add comments
+- Add self collision and controls to output
+- Add size constraints to segments
+- Generate different object of different sizes
+- Figure out why it is not storing all data
 
 ## Additional Notes:
 This project was originally created by Josh Campbell, and has been adjusted by me. The original repository can be found at:
