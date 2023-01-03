@@ -151,10 +151,10 @@ for root, dirs, files in os.walk(clearing_path):
             fittest_file = os.path.join(root, hand_name)
 
 with open("../results.txt", mode="w") as resultsFile:
-    resultsFile.write("The fittest of them all is: " + str(fittestFirst))
-    resultsFile.write("Location is: " + str(root))
-    resultsFile.write("Runner up is: " + str(secondFittest))
-    resultsFile.write("Overall results are: " + str(sortedScoring))
+    resultsFile.write("The fittest of them all is: " + str(fittestFirst) + "\n")
+    resultsFile.write("Location is: " + str(root) + "\n")
+    resultsFile.write("Runner up is: " + str(secondFittest) + "\n")
+    resultsFile.write("Overall results are: " + str(sortedScoring) + "\n")
     resultsFile.close()
 
 basic_load.load(fittest_file)
