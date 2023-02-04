@@ -113,6 +113,9 @@ It will also write the results to a file:
 - Add self collision and controls to output
 - Add size constraints to segments
 - Generate different object of different sizes
+- Switch hand generation to ratios
+- Keep the sum of finger and palm lengths the same
+- Incorporate IK solver
 
 ## Additional Notes:
 This project was originally created by Josh Campbell, and has been adjusted by me. The original repository can be found at:
