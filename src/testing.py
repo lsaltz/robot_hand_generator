@@ -3,6 +3,7 @@
 
 #!/usr/bin/python3
 import pybullet as p
+import matplotlib.pyplot as plt
 import time
 import pybullet_data
 import os
@@ -10,10 +11,11 @@ import json
 import glob
 from math import pi
 import random
+
 class sim_tester():
     """Simulator class to test different hands in."""
 
-    def __init__(self, gripper_name, gripper_loc):
+    def __init__(self, gripper_name, gripper_loc, rob_dic):
         """Initialize the sim_tester class.
 
         Args:
@@ -22,7 +24,7 @@ class sim_tester():
         """
         self.gripper_name = gripper_name
         self.gripper_loc = gripper_loc
-        
+        self.rob_dic = rob_dic
         self.directory = os.path.dirname(__file__)
  
 
@@ -30,12 +32,51 @@ class sim_tester():
     This runs the simulation, opens the gripper urdf into the simulation, generates a sphere, 
     measures the fitness score based off contact made at two points, and generates new spheres at random positions
     if one gets knocked to far away for the gripper to reach.
-    """
-    def main(self, start):
-        executionTime = 0
-         
+    """       
+    def coordinate_array(self):
+        finger_z = self.rob_dic.finger_z + 0.25
+        val = 0.01
+        palm_z = self.rob_dic.palm_z
+        total_height = self.rob_dic.total_height
+        coords1 = []
+        coords2 = []
+        top = total_height + 0.25
+        bottom = -abs(palm_z/2)
+        bottom_point_right = ((0-finger_z), 0, (bottom))
+        top_point_right = ((0-finger_z), 0, (top))
+        bottom_point_left = (finger_z, 0, (bottom))
+        top_point_left = (finger_z, 0, (top))
+        area = (finger_z + finger_z) * top
+        row_length = area/(top-bottom)
+        column_length = area/(finger_z * 2)
+        row_points = int(row_length/0.005)
+        column_points = int(column_length/0.005)
+        
+        valx1 = 0
+        valx2 = 0.05
+        x1 = top
+        
+        while x1 > 0-finger_z: 
+            x1 = ((finger_z+val)-valx1)
+            x2 = ((finger_z+val)-valx2)
+            valx1 = valx1 + val
+            valx2 = valx2 + val
+            valy1 = 0
+            valy2 = 0
+            y1 = bottom
+            
+            while y1 < top:
 
-        success = 0
+                y1 = ((bottom-val)+valy1)
+                y2 = ((bottom-val)+valy2)
+                valy1 = valy1 + val
+                valy2 = valy2 + val
+                coords1.append([x1, y1, 0])
+                coords2.append([x2, y2, 0])
+        return coords1, coords2
+        
+    def main(self, generation):
+        co0, co1 = self.coordinate_array()
         physicsClient = p.connect(p.DIRECT)  # or p.GUI for graphical version
         p.setAdditionalSearchPath(pybullet_data.getDataPath())  # optionally
         p.setGravity(0, 0, 0)
@@ -43,80 +84,94 @@ class sim_tester():
         cubeStartPos = [0, 0, 1]
         cubeStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
 
-        boxId = p.loadURDF(f"{self.gripper_loc}/{self.gripper_name}.urdf", useFixedBase=1, flags=p.URDF_USE_SELF_COLLISION)#, baseOrientation=p.getQuaternionFromEuler([0, pi/2, pi/2]))
+        boxId = p.loadURDF(f"{self.gripper_loc}/{self.gripper_name}.urdf", useFixedBase=1, flags=p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT)#, baseOrientation=p.getQuaternionFromEuler([0, pi/2, pi/2]))
 
         gripper = boxId
 
             
         p.resetDebugVisualizerCamera(cameraDistance=.2, cameraYaw=180, cameraPitch=-91, cameraTargetPosition=[0, 0.1, 0.1])
-        appleC = p.createCollisionShape(p.GEOM_SPHERE,radius=0.02)
-        appleV = p.createVisualShape(p.GEOM_SPHERE, radius=0.02, rgbaColor=[1,0,0,1])
-        apple = p.createMultiBody(appleC,appleV,basePosition=[random.uniform(-0.01,0.08),random.uniform(-0.01,0.08),0.01],flags=p.URDF_USE_SELF_COLLISION)
                     
-        p.changeDynamics(apple, -1, mass=0.0001)
-            
-            
-
-           # links_list = []
-            
-        for i in range(0, p.getNumJoints(gripper)):
-               # links_list.append(int(i))       
-            p.setJointMotorControl2(gripper, i, p.POSITION_CONTROL, targetPosition=1.5)
-            linkName = p.getJointInfo(gripper, i)[12].decode("ascii")
-            #idealfinger0Contact = 1 
-            #ideaFinger1Contact = 1 #CHANGE THIS TO NUMBER OF FINGER SEGMENTS 
-            #finger0ContactPoints = 0
-            #finger1ContactPoints = 0
-            idealContactPoints = 2
        
-        while p.isConnected() and executionTime < 15:
+        p.changeDynamics(gripper, 3, jointLowerLimit=-1.5, jointUpperLimit=1.4)
+        p.changeDynamics(gripper, 0, jointLowerLimit=-1.5, jointUpperLimit=1.4)
+        Lcount = 0
+        Rcount = 0  
+        name = self.gripper_name + ".png"        
+        if generation % 50 == 0:
+            figure, axis = plt.subplots(2, 1)
+            axis[0].set_title("Finger 0")
+            axis[1].set_title("Finger 1")
+            for i in range(len(co0)):
+            
+                axis[0].scatter(co0[i][0], co0[i][1], color='red')
+                axis[1].scatter(co1[i][0], co1[i][1], color='red')
+            for i in range(len(co0)):
+
+                idealJointPoses = p.calculateInverseKinematics2(gripper, [2, 5], [co0[i],co1[i]], maxNumIterations=3000)
                 
-            p.performCollisionDetection(physicsClient)
-            contactPoints = len(p.getContactPoints(gripper, apple))
-         
-            points = p.getClosestPoints(gripper, apple, 0.25)
-
-            if points == ():
-                appleC = p.createCollisionShape(p.GEOM_SPHERE,radius=0.02)
-                appleV = p.createVisualShape(p.GEOM_SPHERE, radius=0.02, rgbaColor=[1,0,0,1])
-                apple = p.createMultiBody(appleC,appleV,basePosition=[random.uniform(-0.01,0.08),random.uniform(-0.01,0.08),0.01],flags=p.URDF_USE_SELF_COLLISION)
-                p.changeDynamics(apple, -1, mass=0.0001)
-
-
-                #idealpos = []
-                #idealkin = []
-                #links_list=[]
+                p.setJointMotorControlArray(gripper, [0, 1, 2, 3, 4, 5], p.POSITION_CONTROL, targetPositions=idealJointPoses)
+                worldPos = p.getLinkStates(gripper, [2, 5], computeForwardKinematics=1)
+          
+                if (worldPos[0][0][0] <= co0[i][0]+0.05 and worldPos[0][0][0] >= co0[i][0]-0.05) and (worldPos[0][0][1] <= co0[i][1]+0.05 and worldPos[0][0][1] >= co0[i][1]-0.05):
+                    print("R Reached!")
+                    Rcount = Rcount + 1
+                    axis[0].scatter(co0[i][0], co0[i][1], color='green')
+                else:
+                    print("R not reached")
                 
-            if contactPoints >= idealContactPoints:
-                    #for i in range(0, p.getNumJoints(gripper)):
-                        #links_list.append(p.getLinkState(gripper, i))                 
-                        #idealpos.append(links_list[i][4])
-                        #target = ()
-                        #target = idealpos[i]
-                        #idealkin=p.calculateInverseKinematics(gripper, i, targetPosition=target, maxNumIterations=100)
-                    #for i in range(len(idealkin)):
-                        #var = idealkin[i]
-                        #p.setJointMotorControl2(gripper, i, p.POSITION_CONTROL, targetPosition=var, force=1)  
-                    #p.removeBody(apple)
-                success+=1                        
-                print("Successful Contact made: ", success)
-                    
-                   
-                    
-               
-                    
-                
-            else:
-                for i in range(0, p.getNumJoints(gripper)):
-                    p.setJointMotorControl2(gripper, i, p.POSITION_CONTROL, targetPosition=random.uniform(-2,2), force=1)
-                    
-            p.stepSimulation()
-            time.sleep(1. / 240.)
+                      
+                if (worldPos[1][0][0] <= co1[i][0]+0.05 and worldPos[1][0][0] >= co1[i][0]-0.05) and (worldPos[1][0][1] <= co1[i][1]+0.05 and worldPos[1][0][1] >= co1[i][1]-0.005):
+                    print("L Reached!")
+                    Lcount = Lcount + 1
+                    axis[1].scatter(co1[i][0], co1[i][1], color='green')
+                else:
+                    print("L not reached")
+                           
+                p.stepSimulation()
+                time.sleep(1. / 240.)
+            print(Lcount)
 
-            executionTime = (time.time() - start)
-       
+            print(Rcount)
+
+            print(len(co0))
+            
+            plt.savefig(f"../output/{name}")
+        else:
+            for i in range(len(co0)):
+
+                idealJointPoses = p.calculateInverseKinematics2(gripper, [2, 5], [co0[i],co1[i]], maxNumIterations=3000)
+                
+                p.setJointMotorControlArray(gripper, [0, 1, 2, 3, 4, 5], p.POSITION_CONTROL, targetPositions=idealJointPoses)
+                worldPos = p.getLinkStates(gripper, [2, 5], computeForwardKinematics=1)
+          
+                if (worldPos[0][0][0] <= co0[i][0]+0.05 and worldPos[0][0][0] >= co0[i][0]-0.05) and (worldPos[0][0][1] <= co0[i][1]+0.05 and worldPos[0][0][1] >= co0[i][1]-0.05):
+                    print("R Reached!")
+                    Rcount = Rcount + 1
+                else:
+                    print("R not reached")
+                
+                      
+                if (worldPos[1][0][0] <= co1[i][0]+0.05 and worldPos[1][0][0] >= co1[i][0]-0.05) and (worldPos[1][0][1] <= co1[i][1]+0.05 and worldPos[1][0][1] >= co1[i][1]-0.005):
+                    print("L Reached!")
+                    Lcount = Lcount + 1
+                else:
+                    print("L not reached")
+                           
+                p.stepSimulation()
+                time.sleep(1. / 240.)
+                
+            print(Lcount)
+
+            print(Rcount)
+
+            print(len(co0))
+            
         p.disconnect()
-        return success
+        success = Lcount + Rcount
+        return success                
+
+
+                          
         
         
 def read_json(file_loc):
@@ -132,13 +187,3 @@ def read_json(file_loc):
         file_contents = json.load(read_file)
     return file_contents
 
-"""
-                for i in range(0, p.getNumJoints(gripper)):
-                    if "finger0" in str(linkName):
-                        p.performCollisionDetection(physicsClient)
-                        finger0ContactPoints = len(p.getContactPoints(bodyA=gripper,bodyB=apple))
-                                     
-                    if "finger1" in str(linkName):
-                        p.performCollisionDetection(physicsClient)
-                        finger1ContactPoints = len(p.getContactPoints(bodyA = gripper, bodyB=apple, linkIndexA=i))
-"""   
