@@ -82,40 +82,18 @@ WSL is currently the only tested method for executing this program.
 ## What the outputs mean:
 
 After ea.py finishes running, it will send all the data it gathered to a text file called "results.txt" located in ~/robot_hand_generator_MLS.
-It will also automatically open the fittest file in the simulation for the user to view and test.
-
-If you run the program in GUI mode, you will get hands such as:
-
-![Strange Grasper 0](/imgs/weirdhand0.png?raw=true "Strange Hand")
-
-![Strange Grasper 1](/imgs/weirdhand1.png?raw=true "Strange Hand")
-
-![Strange Grasper 2](/imgs/weirdhand2.png?raw=true "Strange Hand")
-
-These hands are doing their best to grasp the ball. Eventually, after testing multiple generated hands, it should
-settle on one of the original graspers or one of their children:
-
-![Test_Hand](/imgs/first_test_hand.png?raw=true "Winning Grasper")
-
-![Test_Hand Grasp](/imgs/grasp.png?raw=true "Winning Grasper Grasping")
-
-It will display the winning hand in PyBullet for the user to test themselves:
-
-![Output Hand](/imgs/output.png?raw=true "Winning Grasper Test")
-
-It will also write the results to a file:
-
-![Results](/imgs/results.png?raw=true "Results")
+It lists the winning hand and its location as well as its length ratios of palm to fingers and proximal to distal links. It also lists the runner up hand and the results of the other hands. In the output folder, you can also find a graph of the overall fitness trend and the range of every 50th gripper.
 
 ## Todo:
 
-- Add performance visualization with matplotlib
-- Add self collision and controls to output
-- Add size constraints to segments
-- Generate different object of different sizes
-- Switch hand generation to ratios
-- Keep the sum of finger and palm lengths the same
-- Incorporate IK solver
+- Update comments and add photos to README
+- Fix mutations file
+- change fitness score
+- Incorporate cube
+- Output data only of the 10% worst and best grippers
+- Adjust graph scaling
+- Incorporate new IK solver
+- Move to 3D space
 
 ## Additional Notes:
 This project was originally created by Josh Campbell, and has been adjusted by me. The original repository can be found at:
