@@ -1,17 +1,17 @@
 [![DOI](https://zenodo.org/badge/449414021.svg)](https://zenodo.org/badge/latestdoi/449414021)
 # robot_hand_generator_MLS: evolutionary algorithm edition
-A tool used to generate the best hand design to pick up and hold onto a sphere.
+A tool used to generate the best symmetrical two-fingered hand design to pick up and hold onto a cube. Currently tests the hand's range of motion while maintaining x distance between distal links.
 
 ## Requirements:
 
 - Blender 2.93 (only version tested on possibly will work on newer versions)
-- Linux os or WSL with ubuntu
+- Linux OS or WSL with ubuntu
 - PyBullet for simple visaulization and joint checking
 - Python 3.6+
 
 
 ## Install and Setup(git pull):
-WSL is currently the only tested method for executing this program.
+Ubuntu is currently the only tested method for executing this program.
 
 
 1. Run the following commands:
@@ -20,6 +20,7 @@ WSL is currently the only tested method for executing this program.
     
     ```console
     sudo apt update
+    sudo apt upgrade
     ```
     Next, copy the following lines into the terminal:
     
@@ -82,16 +83,13 @@ WSL is currently the only tested method for executing this program.
 ## What the outputs mean:
 
 After ea.py finishes running, it will send all the data it gathered to a text file called "results.txt" located in ~/robot_hand_generator_MLS.
-It lists the winning hand and its location as well as its length ratios of palm to fingers and proximal to distal links. It also lists the runner up hand and the results of the other hands. In the output folder, you can also find a graph of the overall fitness trend and the range of every 50th gripper.
+It lists the winning hand and its location as well as its length ratios of palm to fingers and proximal to distal links. It also lists the runner up hand and the results of the other hands. In the output folder, you can also find a graph of the overall fitness trend, graphs of the top and bottom 10% of grippers generated.
 
 ## Todo:
 
 - Update comments and add photos to README
-- Fix mutations file
 - change fitness score
 - Incorporate cube
-- Output data only of the 10% worst and best grippers
-- Adjust graph scaling
 - Incorporate new IK solver
 - Move to 3D space
 
