@@ -61,7 +61,7 @@ Ubuntu is currently the only tested method for executing this program.
     ```
     and specify for how many generations you would like to run it for. The more you enter, the longer it will take. 
     
-    Currently, I have it set to run only in the terminal. If you wish to view the visual testing process, navigate to:
+    Currently, I have it set to run only in the terminal. If you wish to view the visual testing process(slower), navigate to:
     
     ```console
     cd ~/robot_hand_generator_MLS/src/
@@ -82,16 +82,17 @@ Ubuntu is currently the only tested method for executing this program.
    
 ## What the outputs mean:
 
-After ea.py finishes running, it will send all the data it gathered to a text file called "results.txt" located in ~/robot_hand_generator_MLS.
-It lists the winning hand and its location as well as its length ratios of palm to fingers and proximal to distal links. It also lists the runner up hand and the results of the other hands. In the output folder, you can also find a graph of the overall fitness trend, graphs of the top and bottom 10% of grippers generated.
+After ea.py finishes running, it will send all the data it gathered to a text file called "results.txt" located in ~/robot_hand_generator_MLS/output.
+It lists the winning hand and its location as well as its length ratios of palm to fingers and proximal to distal links. 
+It also lists the runner up hand and the results of the other hands. 
+In the output folder, you can also find a graph of the overall fitness trend and graphs of the top and bottom 10% of grippers generated.
 
+Some examples of what this looks like are:
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/results.png?raw=true)
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/fitness_trend.png?raw=true)
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_437_2l.png?raw=true)
 ## Todo:
 
-- Update comments and add photos to README
-- change fitness score
-- Incorporate cube
-- Incorporate new IK solver
-- Move to 3D space
 
 ## Additional Notes:
 This project was originally created by Josh Campbell, and has been adjusted by me. The original repository can be found at:
