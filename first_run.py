@@ -78,11 +78,11 @@ class Setup():
 		Args:
 			dict (dictionary): A dictionary containing needed directories
 		"""
-		example_loc = dict['hand_examples']
+		#example_loc = dict['hand_examples']
 		hand_json_queue = dict['hand_json_queue']
 
-		for json_file in glob.glob(f'{example_loc}*.json'):
-			shutil.copy2(json_file, hand_json_queue)
+		#for json_file in glob.glob(f'{example_loc}*.json'):
+			#shutil.copy2(json_file, hand_json_queue)
 
 
 if __name__ == '__main__':
