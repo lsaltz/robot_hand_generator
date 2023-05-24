@@ -34,7 +34,7 @@ Ubuntu is currently the only tested method for executing this program.
     source ~/.bashrc; \
     sudo apt update; sudo apt install -y python3-pip;\
     cd ~/ ; git clone https://github.com/lsaltz/robot_hand_generator_MLS.git;\
-    cd ~/robot_hand_generator/; pip3 install -r requirements.txt;\
+    cd ~/robot_hand_generator_MLS/; pip3 install -r requirements.txt;\
     pip3 install pybullet;\
     pip3 install addict;\
     cd ~/software/; git clone https://github.com/bulletphysics/bullet3.git; cd ./bullet3/; python3 setup.py build; python3 setup.py install;\
