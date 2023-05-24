@@ -53,8 +53,8 @@ class Setup():
 			'hand_json_archive': f'{self.current_directory}/hand_json_files/hand_archive_json/',
 			'hand_examples' : f'{self.current_directory}/hand_json_files/example_hand_json/',
 			'src' : f'{self.current_directory}/src'
-			'output': f'{self.current_directory}/output'
-			'points': f'{self.current_directory}/points'
+			'output' : f'{self.current_directory}/output'
+			'points' : f'{self.current_directory}/points'
 		}
 
 		for directory_name in directory_dict.keys():
