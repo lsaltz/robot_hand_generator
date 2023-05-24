@@ -8,6 +8,7 @@ A tool used to generate the best symmetrical two-fingered hand design to pick up
 - Linux OS or WSL with ubuntu
 - PyBullet for simple visaulization and joint checking
 - Python 3.6+
+- MatPlotLib
 
 
 ## Install and Setup(git pull):
