@@ -97,6 +97,10 @@ Some examples of what this looks like are:
 
 
 ## Additional Notes:
+If you wish to run this software more than once, clear your outputs and points folders. If you run into issues with MESA and OpenGL, add the following to ~/.bashrc:
+'''
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+'''
 This project was originally created by Josh Campbell, and has been adjusted by me. The original repository can be found at:
 https://github.com/OSUrobotics/robot_hand_generator
 
