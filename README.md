@@ -84,7 +84,7 @@ Ubuntu is currently the only tested method for executing this program.
    
 ## What the outputs mean:
 
-After ea.py finishes running, it will send all the data it gathered to a text file called "results.txt" located in ~/robot_hand_generator_MLS/output.
+After ea.py finishes running, it will send the data it gathered to a text file called "results.txt" located in ~/robot_hand_generator_MLS/output.
 It lists the winning hand and its location as well as its length ratios of palm to fingers and proximal to distal links. 
 It also lists the runner up hand and the results of the other hands. 
 In the output folder, you can also find a graph of the overall fitness trend and graphs of the top and bottom 10% of grippers generated.
@@ -93,11 +93,16 @@ Some examples of what this looks like are:
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/results.png?raw=true)
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/fitness_trend.png?raw=true)
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_437_2l.png?raw=true)
-## Todo:
 
+## Todo:
+- Optimize code
+- Tag and remove unreachable points
+- Tag "easy" and "hard" points
+- Implement new IK solver
+- Implement r and theta 
 
 ## Additional Notes:
-If you wish to run this software more than once, clear your outputs and points folders. If you run into issues with MESA and OpenGL, add the following to ~/.bashrc:
+If you wish to run this software more than once, make sure your output, example hand, hand archive, hand queue, and points folders are cleared. If you run into issues with MESA and OpenGL, add the following to ~/.bashrc:
 ```
 export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
 ```
