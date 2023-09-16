@@ -29,7 +29,6 @@ class crossoverFunctions:
             dictionary = json.load(parentfile)
             parent = Dict(dictionary)
         parentfile.close()
-        print("parent dictionaries created")
         return parent
 
     """

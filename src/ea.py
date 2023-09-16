@@ -1,5 +1,4 @@
 # By Marshall Saltz
-#REORGANIZE ALL THIS SHIT
 import random
 import numpy as np
 import os
@@ -8,14 +7,12 @@ import mutations
 from addict import Dict
 import matplotlib.pyplot as plt
 import testing
-import glob
 import time
 import main
 from pathlib import Path
 import basic_load
 import combination
 import first_generation
-import operator
 import copy
 import pandas as pd
 import shutil
@@ -23,6 +20,8 @@ import sqlite3
 
 """
 Returns copy files from overall list
+Parameters:
+    ls: total list of grippers
 """
 def return_duplicates(ls):
     new_ls = [l.to_dict() for l in ls]
@@ -30,16 +29,19 @@ def return_duplicates(ls):
     dup = df[df[['palm', 'fingers', 'proximal', 'distal']].duplicated(keep='last') == True]
     dupDics = dup.to_dict('records')
     return dupDics
-
+    
 """
-Kills the copies
+Kills the copies and weaker grippers
+Parameters:
+    ls: total list of grippers
+    fitness: list of fitnesses
+    genList: generational list of grippers
+    first: hand with highest fitness
 """   
-def death(ls, fitness, genList, first):    ####drops all the duplicates from EVERYTHING
-    returned_ls = []
-    returned_fitness = []
+def death(ls, fitness, genList, first):
+    weak_name = []
     copied_fitness = copy.deepcopy(fitness)
     dups = return_duplicates(ls)
-    returned_genList = []
     if dups is not None:
         for d in dups:
             name = d['name']
@@ -54,26 +56,47 @@ def death(ls, fitness, genList, first):    ####drops all the duplicates from EVE
                     if d['name'] == g['name']:
                         genList.remove(g)
                 path1 = f"../output/{name}"
-                print(path1)
                 path2 = f"../points/{name}.json"
-                print(path2)
                 path3 = f"../hand_json_files/hand_archive_json/{name}.json"
-                print(path3)
                 if os.path.exists(path1):
                     shutil.rmtree(path1)
-                    print(path1 + " removed")
                 if os.path.exists(path2):
                     os.remove(path2)
-                    print(path2 + " removed")
                 if os.path.exists(path3):
                     os.remove(path3)
-                    print(path3 + " removed")
+    """
+    for i in copied_fitness:
+        if i[0] == 0:
+            weak_name.append(i[1].split('.')[0])
+            copied_fitness.remove(i)
+    if weak_name is not None:
+        for n in weak_name:
+            for g in genList:
+                if n == g['name']:
+                    genList.remove(g)
+            for l in ls:
+                if n == l['name']:
+                    ls.remove(l)
+            path1 = f"../output/{n}"
+               
+            path2 = f"../points/{n}.json"
+        
+            path3 = f"../hand_json_files/hand_archive_json/{n}.json"
+            if os.path.exists(path1):
+                shutil.rmtree(path1)
+            if os.path.exists(path2):
+                os.remove(path2)
+            if os.path.exists(path3):
+                os.remove(path3) 
+    """        
     return ls, copied_fitness, genList
   
 """
 Converts json to binary BLOB for storage
+Parameters: 
+    jfile: file to be converted 
 """
-def json_to_binary(jfile, index):
+def json_to_binary(jfile):
     with open(jfile, mode="r") as f:
         hand_data = json.load(f)
         data_binary = json.dumps(hand_data).encode('utf-8')
@@ -82,19 +105,24 @@ def json_to_binary(jfile, index):
 
 """
 Adds files to SQLite Database
+Parameters:
+    genList: generational list of grippers
+    connection1: connection to points list database
+    connection2: connection to gripper json database
+    first: gripper with highest fitness score
 """
 def add_to_database(genList, connection1, connection2, first):
     cursor1 = connection1.cursor()
     cursor2 = connection2.cursor()
     for i in range(len(genList)):
-        if genList[i].name + '.json' != str(first):#
+        if genList[i].name + '.json' != str(first):
             f_name = genList[i].name + ".json"
             jfile1 = f"../points/{genList[i].name}.json"
-            bin1 = json_to_binary(jfile1, i)
+            bin1 = json_to_binary(jfile1)
             cursor1.execute("insert into hand_data (ID, name, data) values(?,?,?)",(i, f_name, bin1))
             connection1.commit()
             jfile2 = f"../hand_json_files/hand_archive_json/{genList[i].name}.json"
-            bin2 = json_to_binary(jfile2, i)
+            bin2 = json_to_binary(jfile2)
             cursor2.execute("insert into hand_files (ID, name, data) values(?,?,?)",(i, f_name, bin2))
             connection2.commit()   
             os.remove(jfile1)
@@ -102,6 +130,10 @@ def add_to_database(genList, connection1, connection2, first):
          
 """
 Gets top/bottom 10 from database and converts them from binary back to json
+Parameters:
+    ten_list: bottom or top ten percent of grippers
+    connection: database to be opened
+    first: gripper in first place 
 """
 def get_from_database(ten_list, connection, first):
     cr = connection.cursor()
@@ -120,6 +152,12 @@ def get_from_database(ten_list, connection, first):
 
 """
 Calls combine to combine two files
+Parameters:
+    p0: parent 0
+    p1: parent 1
+    num: generation number
+    s: a letter indicating which mode of combining
+    l: child index
 """
 def crossover(p0, p1, num, s, l):
     tmpList = []
@@ -137,6 +175,11 @@ def crossover(p0, p1, num, s, l):
 """
 Acts like a pollen carrier to "spread" the fittest hand's genes to the other hands in the generation. Also loops
 through even and odd dictionaries to combine them
+Parameters:
+    genList: generational list of grippers
+    ls: total list of grippers
+    first: gripper with highest fitness score
+    generation: generation number
 """
 def carrier(genList, ls, first, generation):    ###
      oddDics = []
@@ -167,6 +210,11 @@ def carrier(genList, ls, first, generation):    ###
 
 """
 Tests hands, loops through current generation
+Parameters:
+    dicList: generational dictionary
+    num: generation number
+    coords0: finger list of coordinates
+    coords1: other finger list of coordinates
 """
 def test(dicList, num, coords0, coords1):####
     tmpFitness = []
@@ -180,6 +228,8 @@ def test(dicList, num, coords0, coords1):####
 
 """
 Sorts scores
+Parameters:
+    scoring: unsorted fitness list
 """    
 def sort_scores(scoring):###
     sortedScoring = sorted(scoring, key = lambda x: float(x[0])) #Sorts array by fittness scores
@@ -188,6 +238,10 @@ def sort_scores(scoring):###
 
 """
 Runs mutations. Gets fittest file and mutates on that
+Parameters:
+    tomutate:P list of files to mutate
+    first: gripper with highest fitness score
+    num: generation number
 """
 def mut_on_first(tomutate, first, num):
     firstList = []
@@ -205,7 +259,9 @@ def mut_on_first(tomutate, first, num):
     return firstList
     
 """
-Gets number 10% of overall number of hands
+Gets numerical amount of 10% of overall number of hands
+Parameters:
+   sortedScoring: sorted fitness list
 """    
 def get_10_percent(sortedScoring):
     length = len(sortedScoring)
@@ -216,6 +272,8 @@ def get_10_percent(sortedScoring):
 
 """
 Gets list of bottom ten
+Parameters:
+    ten_num: numerical amount of 10% of grippers generated
 """  
 def get_bottom_10(ten_num):
     bottom_10 = []
@@ -224,6 +282,8 @@ def get_bottom_10(ten_num):
 
 """
 Gets list of top ten
+Parameters:
+    ten_num: numerical amount of 10% of grippers generated
 """    
 def get_top_10(ten_num):
     top_ten = []
@@ -232,6 +292,8 @@ def get_top_10(ten_num):
 
 """
 Generates top and bottom 10% data
+Parameters:
+    ten_perc_list: list of bottom or top 10% grippers
 """    
 def generate_ten_perc_graphs(ten_perc_list):
     for i in range(len(ten_perc_list)):
@@ -252,9 +314,9 @@ def generate_ten_perc_graphs(ten_perc_list):
             axis[0].set_title("Finger 0")
             axis[1].set_title("Finger 1")
             axis[2].set_title("Total")
-            axis[0].set_aspect('equal', 'box')
-            axis[1].set_aspect('equal', 'box')
-            axis[2].set_aspect('equal', 'box')
+            axis[0].set_aspect('equal')
+            axis[1].set_aspect('equal')
+            axis[2].set_aspect('equal')
             for k in range(len(nr_R)):
                 axis[0].scatter(nr_R[k][0], nr_R[k][1], color='red')
                 axis[2].scatter(nr_R[k][0], nr_R[k][1], color='red')
@@ -269,9 +331,70 @@ def generate_ten_perc_graphs(ten_perc_list):
                 axis[2].scatter(coordsL[x][0], coordsL[x][1], color='blue')
             plt.savefig(f"../output/{g_name}")
             plt.close('all')  
+
+"""
+Generates a graph of overall top 10% data. Output is a graph of hard to reach (yellow), easy to reach(blue), and impossible(red) points
+Parameters:
+    ten_perc_list: top 10% of grippers
+"""
+def overall_graph(ten_perc_list):
+    figure, axis = plt.subplots(3, 1)
+    axis[0].set_title("Finger 0")
+    axis[1].set_title("Finger 1")
+    axis[2].set_title("Total")
+    axis[0].set_aspect('equal')
+    axis[1].set_aspect('equal')
+    axis[2].set_aspect('equal')
+    name_graph = "overall_graph.png"
+    coordsR = []
+    nr_R = []
+    coordsL = []
+    nr_L = []
+    
+    for i in range(len(ten_perc_list)):
+        name = ten_perc_list[i][1]
+        with open(f"../points/{name}", mode="r") as f:
+            fi = json.load(f)
+            dictionary = Dict(fi)
+            coordsR.extend(list(dictionary.finger_0.reached))
+            coordsL.extend(list(dictionary.finger_1.reached))
+            nr_R.extend(list(dictionary.finger_0.not_reached))
+            nr_L.extend(list(dictionary.finger_1.not_reached))
+    for k in nr_R:
+        if k not in coordsR:
+            axis[0].scatter(k[0], k[1], color='red')
+            axis[2].scatter(k[0], k[1], color='red')
+        else:
+            axis[0].scatter(k[0], k[1], color='yellow')
+            axis[2].scatter(k[0], k[1], color='yellow')                
+    for z in nr_L:
+        if z not in coordsL:
+            axis[1].scatter(z[0], z[1], color='red')
+            axis[2].scatter(z[0], z[1], color='red')
+        else:
+            axis[1].scatter(z[0], z[1], color='yellow')
+            axis[2].scatter(z[0], z[1], color='yellow')           
+    for j in coordsR:
+        if j not in nr_R:
+            axis[0].scatter(j[0], j[1], color='blue')
+            axis[2].scatter(j[0], j[1], color='blue')
+        else:
+            axis[0].scatter(j[0], j[1], color='yellow')
+            axis[2].scatter(j[0], j[1], color='yellow')     
+    for x in coordsL:
+        if x not in nr_L:
+            axis[1].scatter(x[0], x[1], color='blue')
+            axis[2].scatter(x[0], x[1], color='blue')
+        else:
+            axis[1].scatter(x[0], x[1], color='yellow')
+            axis[2].scatter(x[0], x[1], color='yellow')
+    plt.savefig(f"../output/{name_graph}")
+    plt.close('all')      
              
 """
 Opens the fittest file in PyBullet, called after everything has been completed.
+Parameters:
+    fittestFirst: fittest file
 """    
 def open_file(fittestFirst):
     name = fittestFirst.split('.')[0]
@@ -280,7 +403,13 @@ def open_file(fittestFirst):
     basic_load.load(fittest_file)
 
 """
-writes data to results file
+Writes data to results file
+Parameters:
+    ls: total list of grippers
+    fittestFirst: fittest gripper
+    sortedScoring: sorted list of fitnesses
+    top_10: top 10% of grippers
+    bottom_10: bottom 10% of grippers
 """    
 def write_to_file(ls, fittestFirst, sortedScoring, top_10, bottom_10):
     winning_ratios = Dict()
@@ -309,6 +438,9 @@ def write_to_file(ls, fittestFirst, sortedScoring, top_10, bottom_10):
 
 """
 Plots fitness trend over generations
+Parameters:
+    generational_fitness: max fitness of generation
+    generations: total generation number
 """        
 def plot_fitness(generational_fitness, generations):
     epochs = []
@@ -323,7 +455,13 @@ def plot_fitness(generational_fitness, generations):
     plt.savefig("../output/fitness_trend")
 
 """
-Tests hands
+Tests hands and alters lists
+Parameters:
+    ls: total list of grippers
+    tmpList: temporary list of grippers from generation
+    num: generation number
+    coords0: finger coordinates
+    coords1: finger coordinates
 """    
 def helper_function(ls, tmpList, cycle_fitness, num, coords0, coords1):
     
@@ -338,37 +476,45 @@ def helper_function(ls, tmpList, cycle_fitness, num, coords0, coords1):
 Generates a coordinate array to test hands on
 """
 def coordinate_array():
-    finger_z = 0.36 + 0.25
-    val = 0.03
+    finger_z = 0.5
+    val = 0.05
     palm_z = 0.053
-    total_height = 0.36
-    xoffset = 0.2
+    total_height = 0.5
     coords1 = []
     coords2 = []
-    bottom_x = -abs(total_height + 0.25)
+    bottom_x = -abs(total_height)
     bottom_y = -abs(palm_z/2)
     row_length = finger_z - bottom_x
     column_length = finger_z - bottom_y
     row_points = int(row_length/val)
     column_points = int(column_length/val)
-        
-    
-    coords1 = [[x1, y1, 0] for x1 in np.linspace(bottom_x, finger_z, num=row_points) for y1 in np.linspace(bottom_y, finger_z, num=column_points)]
-    coords2 = [[x2, y2, 0] for x2 in np.linspace(bottom_x - xoffset, finger_z, num=row_points) for y2 in np.linspace(bottom_y, finger_z, num=column_points)]
-
-    return coords1, coords2
-    
-    
+    n = 8
+    rad = 0.019
+    center_pt = [[x, y, 0] for x in np.linspace(bottom_x, finger_z, num=row_points) for y in np.linspace(bottom_y, finger_z, num=column_points)]
+    #center_pt = [0.1, 0.1, 0]
+    x1 = [(c[0] + (np.cos(2*np.pi/n*x)*rad)) for c in center_pt for x in range(0, n+1)]
+    #x1 = [center_pt[0] + (np.cos(2*np.pi/n*x)*rad) for x in range(0, n+1)]
+    #y1 = [center_pt[1] + (np.sin(2*np.pi/n*x)*rad) for x in range(0, n+1)]
+    y1 = [(c[1] + (np.sin(2*np.pi/n*x)*rad)) for c in center_pt for x in range(0, n+1)]
+    z1 = np.linspace(0, 0, len(x1))
+    coords1 = list(zip(x1, y1, z1))
+    x2 = [(c[0] + (np.cos((2*np.pi/n*x)+np.pi)*rad)) for c in center_pt for x in range(0, n+1)]
+    y2 = [(c[1] + (np.sin((2*np.pi/n*x)+np.pi)*rad)) for c in center_pt for x in range(0, n+1)]
+    #x2 = [center_pt[0] + ((np.cos(2*np.pi/n*x)*rad)+np.pi) for x in range(0, n+1)]
+    #y2 = [center_pt[1] + ((np.sin(2*np.pi/n*x)*rad)+np.pi) for x in range(0, n+1)]
+    z2 = np.linspace(0, 0, len(x2))
+    coords2 = list(zip(x2, y2, z2))
+    return(coords2, coords1)
      
 print("Please input the integer number of generations you would like to run this for: ")
 gen = int(input())+1  #generations ea runs for
 mutateTimes = 2 #Amount of mutated files per generation
 file_name = []  #file name of hands
 max_segs = 3  #Max amount of segments per hand
-ls = []
+ls = []    #total list of grippers
 totalFitness = []
-bottom_10 = []
-top_10 = []
+bottom_10 = []    #bottom 10%
+top_10 = []    #top 10%
 cycle_fitness = []
 generational_fitness = []
 genList = []
@@ -397,12 +543,13 @@ coords0, coords1 = coordinate_array()
     c. test
     d. mutates
     e. tests
-    f. removes copies
+    f. removes copies and weak grippers
     g. gets generational and overall fittest file
     e. adds remaing files that aren't the fittest to database
 
 6. gets top and bottom 10% from database
 7. plots and writes resulting data
+8. opens fittest gripper for viewing
 """
 tmpFit = []
 combine = combination.crossoverFunctions(0)
@@ -425,7 +572,6 @@ generational_fitness.append(max(fitnesses))
 cycle_fitness.clear()
 fitnesses.clear()
 genList.clear()
-
 for num in range(1, gen):
     first = max(sortedScoring, key=lambda item:item[0])[1]
 
@@ -455,9 +601,8 @@ for num in range(1, gen):
     cycle_fitness.clear()    #clear list of all generation fitnesses
     fitnesses.clear()
     genList.clear()
-
+print("Cleaning up and generating graphs...")
 sortedScoring = sort_scores(sortedScoring)
-   
 ten = int(len(sortedScoring)*0.1)
 first = max(sortedScoring, key=lambda item:item[0])[1]
 bottom = get_bottom_10(ten)
@@ -466,6 +611,7 @@ get_from_database(bottom, connection1, first)
 get_from_database(top, connection1, first)
 generate_ten_perc_graphs(bottom)
 generate_ten_perc_graphs(top)
+overall_graph(top)
 connection1.close()
 connection2.close()
 write_to_file(ls, first, sortedScoring, top, bottom)

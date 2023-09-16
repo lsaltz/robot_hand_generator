@@ -41,7 +41,7 @@ def generate(max_segments, generation):
     
     list_of_dics.append(copy.deepcopy(hand_data))
 
-    print("Ratios used for: {} are(palm to fingers): {}:{} and(proximal to distal): {}:{}".format(file_name, ratio_palm, ratio_fingers, ratio_proximal, ratio_distal))
+    #print("Ratios used for: {} are(palm to fingers): {}:{} and(proximal to distal): {}:{}".format(file_name, ratio_palm, ratio_fingers, ratio_proximal, ratio_distal))
     segment_count_0 = max_segments	#np.random.randint(1, max_segments)
     segment_count_1 = max_segments	#np.random.randint(1, max_segments)
 

@@ -85,7 +85,7 @@ class HandGenerator():
 		for finger_number, finger in enumerate(self.mesh_queue["fingers"]):
 			for segment_number, segment in enumerate(finger.segments):
 
-				print(len(segment.verts), len(segment.faces))		
+				#print(len(segment.verts), len(segment.faces))		
 				HF.blender_make_mesh(segment.verts, segment.faces, f"finger{finger_number}_segment{segment_number}")
 				HF.export_part(f"finger{finger_number}_segment{segment_number}_collision", self.obj_files)
 				HF.blender_make_mesh(segment.segment_joint[0].verts, segment.segment_joint[0].faces, f"finger{finger_number}_segment{segment_number}_bottom")

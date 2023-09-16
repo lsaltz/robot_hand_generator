@@ -45,6 +45,8 @@ class sim_tester():
         LinkId = []
         reachedL = []
         reachedR = []
+        nr_R = []
+        nr_L = []
         Rcount = 0
         Lcount = 0
         gripper_vals = Dict()
@@ -58,8 +60,8 @@ class sim_tester():
           
         p.resetDebugVisualizerCamera(cameraDistance=.2, cameraYaw=180, cameraPitch=-91, cameraTargetPosition=[0, 0.1, 0.1])
                     
-        p.changeDynamics(gripper, 0, jointLowerLimit=((math.pi)/2), jointUpperLimit=((5*math.pi)/4))
-        p.changeDynamics(gripper, 3, jointLowerLimit=-((5*math.pi)/4), jointUpperLimit=((3*math.pi)/2))
+        p.changeDynamics(gripper, 0, jointLowerLimit=((math.pi)/4), jointUpperLimit=((5*math.pi)/4))
+        p.changeDynamics(gripper, 3, jointLowerLimit=((3*math.pi)/4), jointUpperLimit=((7*math.pi)/4))
         p.changeDynamics(gripper, 1, jointLowerLimit=-(math.pi/2), jointUpperLimit=(math.pi/2))
         p.changeDynamics(gripper, 4, jointLowerLimit=-(math.pi/2), jointUpperLimit=(math.pi/2))
         list_of_points_1 = []
@@ -78,7 +80,7 @@ class sim_tester():
             p.resetJointState(gripper, 0, targetValue=((5*math.pi)/4))
             p.resetJointState(gripper, 1, targetValue=(math.pi/2))
             
-            p.resetJointState(gripper, 3, targetValue=-((5*math.pi)/4))
+            p.resetJointState(gripper, 3, targetValue=((3*math.pi)/4))
             p.resetJointState(gripper, 4, targetValue=-(math.pi/2))
             
             idealJointPoses1 = p.calculateInverseKinematics(gripper, 5, co1[i], maxNumIterations=3000)
@@ -91,9 +93,6 @@ class sim_tester():
             p.resetJointState(gripper, 4, targetValue=idealJointPoses1[4])
             p.resetJointState(gripper, 5, targetValue=idealJointPoses1[5])
             worldPos = p.getLinkStates(gripper, [2, 5], computeForwardKinematics=1)
-            y = []
-            x = []
-            z = []
             joint_axis = []
             nums = []
             p.performCollisionDetection()
@@ -101,8 +100,7 @@ class sim_tester():
             for links in range(p.getNumJoints(gripper)):
                 num = p.getAABB(gripper, links)
                 nums.append(p.getOverlappingObjects(num[0], num[1]))
-                add = add + len(nums[links])
-                
+                add = add + len(nums[links])   
             offset_val = 3
             
             world_pos_0_x = round(worldPos[0][0][0], offset_val)
@@ -114,18 +112,19 @@ class sim_tester():
             point_0_y = round(co0[i][1], offset_val)
             point_1_x = round(co1[i][0], offset_val)
             point_1_y = round(co1[i][1], offset_val)
- 
-            if world_pos_0_x == point_0_x and world_pos_0_y == point_0_y and world_pos_1_x == point_1_x and world_pos_1_y == point_1_y and add <= 20:
-                           
-                reachedR.append((co0[i][0], co0[i][1]))
-                reachedL.append((co1[i][0], co1[i][1]))
+            
+            if world_pos_0_x == point_0_x and world_pos_0_y == point_0_y and world_pos_1_x == point_1_x and world_pos_1_y == point_1_y and add <= 16:
+                reachedR.append((point_0_x, point_0_y))
+                reachedL.append((point_1_x, point_1_y))
                 p.removeUserDebugItem(list_of_points_0[i])
                 p.removeUserDebugItem(list_of_points_1[i])
                 p.addUserDebugPoints([co0[i]], [[0.016, 0.96, 0.99]])
                 p.addUserDebugPoints([co1[i]], [[0.016, 0.96, 0.99]])
                 Rcount = Rcount + 1 
                 Lcount = Lcount + 1            
-
+            else:
+                nr_R.append((point_0_x, point_0_y))
+                nr_L.append((point_1_x, point_1_y))
             p.stepSimulation()
             nums.clear()
             time.sleep(1. / 240.)
@@ -134,8 +133,8 @@ class sim_tester():
         success = (Lcount + Rcount) / (len(co0) * 2)
         gripper_vals.finger_0.reached = reachedR
         gripper_vals.finger_1.reached = reachedL
-        gripper_vals.finger_0.not_reached = co0
-        gripper_vals.finger_1.not_reached = co1
+        gripper_vals.finger_0.not_reached = nr_R
+        gripper_vals.finger_1.not_reached = nr_L
         
         with open(f"../points/{self.gripper_name}.json", "w") as f:
             new_json = ""

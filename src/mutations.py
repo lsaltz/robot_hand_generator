@@ -67,11 +67,11 @@ def mutate(mutationsNum, max_segments, robot_gripper, data, generation):
         hand_data.proximal = ratio_proximal
         hand_data.distal = ratio_distal
         hand_data.update()
-        print("hd: ", hand_data)
+        #print("hd: ", hand_data)
         list_of_dics.append(copy.deepcopy(hand_data))
         hand_data.clear()
         
-        print("Ratios used for: {} are(palm to fingers): {}:{} and(proximal to distal): {}:{}".format(file_name, ratio_palm, ratio_fingers, ratio_proximal, ratio_distal))
+        #print("Ratios used for: {} are(palm to fingers): {}:{} and(proximal to distal): {}:{}".format(file_name, ratio_palm, ratio_fingers, ratio_proximal, ratio_distal))
         segment_count_0 = max_segments	#np.random.randint(1, max_segments)
         segment_count_1 = max_segments	#np.random.randint(1, max_segments)
 
@@ -173,8 +173,5 @@ def mutate(mutationsNum, max_segments, robot_gripper, data, generation):
             jfile.write(new_json)
         jfile.close()       
         
-        robot_gripper.clear()
-    print("A new hand has been mutated.")   
-    print("ld: ", list_of_dics)
-        
+        robot_gripper.clear()        
     return list_of_dics
