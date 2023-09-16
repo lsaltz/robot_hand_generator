@@ -92,7 +92,9 @@ In the output folder, you can also find a graph of the overall fitness trend, an
 Some examples of what this looks like are:
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/results.png?raw=true)
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/fitness_trend.png?raw=true)
+Winning hand:
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_5_2m.png?raw=true)
+Overall points of top 10%:
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/overall_graph.png?raw=true)
 
 Currently the maximum amount of times this code has been run is 25. I plan to run it 500 times once I return to my desktop.
