@@ -95,7 +95,7 @@ Currently the maximum amount of times this code has been run is 25. I plan to ru
 
 
 ## Additional Notes:
-If you wish to run this software more than once, clear your outputs and points folders. If you run into issues with MESA and OpenGL, add the following to ~/.bashrc:
+If you wish to run this software more than once, clear your output, hand archive, hand queue, and points folders. If you run into issues with MESA and OpenGL, add the following to ~/.bashrc:
 ```
 export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
 ```
