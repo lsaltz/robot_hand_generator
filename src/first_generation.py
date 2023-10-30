@@ -67,14 +67,15 @@ class First_Generation:
     def determine_seg_ratios(self, finger, num_segs):
         
         list_of_ratios = []
-        prev_rat = 100
+        prev_rat = 95
         nm = num_segs- 2
         ct = 0
         for i in range(0, nm):
-            rat = np.random.randint(1, prev_rat)
+            rat = np.random.randint(1, prev_rat+1)
             list_of_ratios.append(rat)
-            prev_rat = rat
-            ct += prev_rat
+            ct += rat
+            prev_rat = 100-ct
+            
         list_of_ratios.append(100-ct)
            
         
@@ -86,10 +87,10 @@ class First_Generation:
         
         list_of_ratios = self.determine_seg_ratios(finger, num_segs)
         
-        sum_ = sum(list_of_ratios)
+        
         
         for i in range(len(list_of_ratios)):
-            link_length = (finger_length/sum_)*list_of_ratios[i]
+            link_length = (finger_length*list_of_ratios[i])/100
             self.build_finger(finger, i, link_length)
         self.last_link(finger, num_segs-1)
         
@@ -100,8 +101,8 @@ class First_Generation:
         palmz = 0.053
         palmx = 0.032
         self.hand_data.name = file_name
-        self.hand_data.finger_0.num_segs = np.random.randint(3, 5)
-        self.hand_data.finger_1.num_segs = np.random.randint(3, 5)
+        self.hand_data.finger_0.num_segs = random.randint(3, 4)
+        self.hand_data.finger_1.num_segs = random.randint(3, 4)
         
         
         

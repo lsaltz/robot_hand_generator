@@ -158,12 +158,13 @@ class sim_tester():
             p.performCollisionDetection()
             add = 0
             nums = []
+            """
             for links in range(p.getNumJoints(gripper)):
                 num = p.getAABB(gripper, links)
                 nums.append(p.getOverlappingObjects(num[0], num[1]))
                 add = add + len(nums[links]) 
-            
-            if world_pos_0_x == point_0_x and world_pos_0_y == point_0_y and world_pos_1_x == point_1_x and world_pos_1_y == point_1_y and add <= 40:
+            """
+            if world_pos_0_x == point_0_x and world_pos_0_y == point_0_y and world_pos_1_x == point_1_x and world_pos_1_y == point_1_y:
                 
                 reachedR.append((point_0_x, point_0_y))
                 reachedL.append((point_1_x, point_1_y))
@@ -194,7 +195,7 @@ class sim_tester():
         f.close()
         gripper_vals.clear()
         
-        return (success, str(self.gripper_name)+".json")
+        return [success, str(self.gripper_name)+".json"]
         
     def debug_pts(self, sim):
         pc = sim[1]  
@@ -258,7 +259,7 @@ class sim_tester():
         gripper = sim[0]
         pc = sim[1]
         name = sim[2]
-        offset_val = 3
+        offset_val = 2
         world_pos_0_x = round(worldPos[0][0][0], offset_val)
         world_pos_0_y = round(worldPos[0][0][1], offset_val)
         world_pos_1_x = round(worldPos[1][0][0], offset_val)

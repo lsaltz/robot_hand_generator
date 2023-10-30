@@ -36,39 +36,61 @@ class crossoverFunctions:
     """
     Combo takes two parent files and combines them. returns two dictionaries
     """ 
+    def determine_seg_ratios(self, finger, num_segs):
+        
+        
+        list_of_ratios = []
+        prev_rat = 95
+        nm = num_segs- 2
+        ct = 0
+        for i in range(0, nm):
+            rat = np.random.randint(1, prev_rat+1)
+            list_of_ratios.append(rat)
+            ct += rat
+            prev_rat = 100-ct
+            
+        list_of_ratios.append(100-ct)
+           
+        
+       
+        return list_of_ratios 
+    
+    def build_finger(self, finger, i, link_length, child):
+        segment = f"segment_{i}"
+        child.hand[finger][segment].segment_profile = [0.0, 0.0, 0], [0, 0.0, 0]
+        child.hand[finger][segment].segment_dimensions = 0.0322, 0.0165, link_length	#return to this
+        child.hand[finger][segment].segment_bottom_joint.joint_style = "pin"
+        child.hand[finger][segment].segment_bottom_joint.joint_dimensions = 0.0083, 0.006, 0.0108	
+        child.hand[finger][segment].segment_bottom_joint.joint_range = 0, 180
+        child.hand[finger][segment].segment_bottom_joint.joint_friction = "n/a"
+        child.hand[finger][segment].segment_top_joint.joint_style = "pin"
+        child.hand[finger][segment].segment_top_joint.joint_dimensions = 0.01, 0.0162, 0.00925	
+        child.hand[finger][segment].segment_top_joint.joint_range = 0, 180
+        child.hand[finger][segment].segment_top_joint.joint_friction = "n/a"
+        child.hand[finger][segment].segment_sensors.sensor_qty = 0
+        child.update()
+         
     def build_fingers(self, ls0, ls1, totalfingerlength, finger, child, hand_data):
         seg_ratios = []
-        num_segs = len(ls0)
+        num_segs = len(ls0) + 1
         if len(ls0) == len(ls1):
             seg_ratios = copy.deepcopy(ls0)
             for i in range(len(ls0)):
                 seg = f"segment_{i}"
                 child.hand[finger][seg].segment_dimensions = 0.0322, 0.0165, (ls0[i] * totalfingerlength)/100
+        
         else:
-            prev_rat = 100
-            nm = num_segs - 2
-            
-            ct = 0
-            rat_ct = 0
-            for i in range(nm):
-                seg = f"segment_{i}"
-                rat = np.random.randint(1, prev_rat)
-                seg_ratios.append(rat)
-                child.hand.finger_0[seg].segment_dimensions = 0.0322, 0.0165, (rat*totalfingerlength)/100
-                rat_ct += (rat*totalfingerlength)/100
-                prev_rat = rat
-                ct += prev_rat
-                
-            seg_ratios.append(100-ct)
+
+            seg_ratios = self.determine_seg_ratios(finger, num_segs)
         
             
-            
-            
-               
-            seg = f"segment_{nm}"
-            child.hand[finger][seg].segment_dimensions = 0.0322, 0.0165, totalfingerlength-rat_ct
+        
+            for i in range(len(seg_ratios)):
+                link_length = (totalfingerlength*seg_ratios[i])/100
+                self.build_finger(finger, i, link_length, child)
+        hand_data[finger].num_segs = num_segs
         hand_data.ratio.segs[finger] = seg_ratios
-        print(seg_ratios)
+        
         hand_data.update()
         child.update()
         return child    
@@ -78,7 +100,7 @@ class crossoverFunctions:
         hand_data1 = Dict()
         
         c0 = copy.deepcopy(parent1)
-        c1 = copy.deepcopy(parent1)
+        c1 = copy.deepcopy(parent2)
         
          
         
@@ -123,7 +145,11 @@ class crossoverFunctions:
         
         c1 = self.build_fingers(p0.ratio.segs.finger_1, p1.ratio.segs.finger_1, finger_1_1, "finger_1", c1, hand_data1)
         
-        
+         
+        hand_data0.ratio.segs.finger_1 = p0.ratio.segs.finger_1
+        hand_data0.finger_1.num_segs = p0.finger_1.num_segs
+        hand_data1.ratio.segs.finger_0 = p1.ratio.segs.finger_0
+        hand_data1.finger_0.num_segs = p1.finger_0.num_segs
         hand_data0.ratio.finger_0 = p0f0
         hand_data0.ratio.finger_1 = p0f1
         hand_data0.length.palm = p1.length.palm
@@ -145,7 +171,8 @@ class crossoverFunctions:
         hand_data1.update()
         self.write_to_json(c0)
         self.write_to_json(c1)
-        
+        print(hand_data0)
+        print(hand_data1)
         return hand_data0, hand_data1
     
     

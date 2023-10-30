@@ -64,20 +64,34 @@ class Mutate:
         self.robot_gripper.hand[finger][segment].segment_sensors.sensor_qty = 0
         
         
-    def determine_seg_ratios(self, finger):
-        num_segs = self.data[finger].num_segs
+    def determine_seg_ratios(self, finger, num_segs):
         
-        seg_ratios = self.data.ratio.segs[finger]
-        return seg_ratios
+        
+        list_of_ratios = []
+        prev_rat = 95
+        nm = num_segs- 2
+        ct = 0
+        for i in range(0, nm):
+            rat = np.random.randint(1, prev_rat+1)
+            list_of_ratios.append(rat)
+            ct += rat
+            prev_rat = 100-ct
+            
+        list_of_ratios.append(100-ct)
+           
+        
+        self.hand_data.ratio.segs[finger] = list_of_ratios
+        self.hand_data.update()
+        return list_of_ratios 
         
     def determine_seg_lengths(self, finger_length, finger, num_segs):
         
-        list_of_ratios = self.determine_seg_ratios(finger)
+        list_of_ratios = self.determine_seg_ratios(finger, num_segs)
         
         sum_ = sum(list_of_ratios)
         
         for i in range(len(list_of_ratios)):
-            link_length = (finger_length/sum_)*list_of_ratios[i]
+            link_length = (finger_length*list_of_ratios[i])/100
             self.build_finger(finger, i, link_length)
         self.last_link(finger, num_segs-1)
         
@@ -88,15 +102,15 @@ class Mutate:
         palmz = 0.053
         palmx = 0.032
         self.hand_data.name = file_name
-        self.hand_data.finger_0.num_segs = self.data.finger_0.num_segs
-        self.hand_data.finger_1.num_segs = self.data.finger_1.num_segs
+        self.hand_data.finger_0.num_segs = random.randint(3, 4)
+        self.hand_data.finger_1.num_segs = random.randint(3, 4)
         
         #palm = self.mutation_ratios()
         #fingers = self.mutation_ratios()
         right = self.mutation_ratios()
         left = self.mutation_ratios()
         
-        palm_width = round(random.uniform(0.05, 0.09), 5)
+        palm_width = self.data.length.palm
         fingers_total_length = 0.288
         finger_0_length = fingers_total_length/(right+left) * right
         finger_1_length = fingers_total_length - finger_0_length
@@ -106,10 +120,10 @@ class Mutate:
         self.robot_gripper.hand.palm.palm_dimensions = palmx, palm_width, palmz
         
         self.robot_gripper.hand.palm.finger_qty = 2
-        self.finger_0(palm_width, self.hand_data.finger_0.num_segs)
-        self.determine_seg_lengths(finger_0_length, "finger_0", self.hand_data.finger_0.num_segs)
-        self.finger_1(palm_width, self.hand_data.finger_1.num_segs)
-        self.determine_seg_lengths(finger_1_length, "finger_1", self.hand_data.finger_1.num_segs)
+        self.finger_0(palm_width, int(self.hand_data.finger_0.num_segs))
+        self.determine_seg_lengths(finger_0_length, "finger_0", int(self.hand_data.finger_0.num_segs))
+        self.finger_1(palm_width, int(self.hand_data.finger_1.num_segs))
+        self.determine_seg_lengths(finger_1_length, "finger_1", int(self.hand_data.finger_1.num_segs))
         self.robot_gripper.objects.object_qty = 0
 
         self.robot_gripper.update()
@@ -127,7 +141,8 @@ class Mutate:
             jfile.write(new_json)
         jfile.close()       
         
-        self.robot_gripper.clear()        
+        self.robot_gripper.clear()  
+        print(self.hand_data)      
         return self.hand_data
             
     

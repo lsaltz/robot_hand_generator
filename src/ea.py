@@ -192,7 +192,7 @@ def carrier(genList, ls, first, generation):    ###
      
      for l in range(len(genList)):
          recipient_dic = genList[l]
-         newList.extend(crossover(fittest_dic, recipient_dic, generation, "l", l))
+         newList.extend(crossover(fittest_dic, recipient_dic, generation, "w", l))
      #carriedList = death(newList)
      
      main.MainScript()
@@ -203,7 +203,7 @@ def carrier(genList, ls, first, generation):    ###
              evenDics.append(copy.deepcopy(newList[c]))
              
      for m in range(min(len(evenDics), len(oddDics))):
-         newList.extend(crossover(evenDics[m], oddDics[m], generation, "m", m))
+         newList.extend(crossover(evenDics[m], oddDics[m], generation, "eo", m))
      #returned_List = death(carriedList)
      
      main.MainScript()
@@ -241,7 +241,7 @@ def gui_test(dicList, num, coords0, coords1):####
         name = l['name']
         rt = f"../output/{name}/hand"
         sim_test = testing.sim_tester(name, rt, l, coords0, coords1)
-        tmpFitness.extend(sim_test.gui_test())
+        tmpFitness.append(sim_test.gui_test())
         
     return tmpFitness
 
@@ -284,10 +284,11 @@ Parameters:
    sortedScoring: sorted fitness list
 """    
 def get_10_percent(sortedScoring):
-    length = len(sortedScoring)
-    ten_perc = int(0.3 * length)    
-    if ten_perc == 0:
-        ten_perc = 1
+    #length = len(sortedScoring)
+    #ten_perc = int(0.3 * length)    
+    #if ten_perc == 0:
+        #ten_perc = 1
+    ten_perc = 5
     return ten_perc
 
 """
@@ -506,7 +507,7 @@ def helper_function(ls, tmpList, cycle_fitness, num, coords0, coords1):
     
     
     #cycle_fitness.extend(test(tmpList, num, coords0, coords1))
-    cycle_fitness.append(gui_test(tmpList, num, coords0, coords1))
+    cycle_fitness.extend(gui_test(tmpList, num, coords0, coords1))
     ls.extend(tmpList)
     
     tmpList.clear()
@@ -517,7 +518,7 @@ Generates a coordinate array to test hands on
 """
 def coordinate_array():
     finger_z = 0.3
-    val = 0.05
+    val = 0.03
     
     total_height = 0.288
     coords1 = []
@@ -584,7 +585,7 @@ if __name__ == "__main__":
     main.MainScript() 
     genList.extend(tmpList)
     
-    cycle_fitness.append(gui_test(tmpList, 0, coords0, coords1))
+    cycle_fitness.extend(gui_test(tmpList, 0, coords0, coords1))
     ls.extend(tmpList)
     
     sortedScoring.extend(cycle_fitness)
@@ -594,7 +595,7 @@ if __name__ == "__main__":
     mutatedList = mut_on_first(ls, first, 0)   #performs mutations on first fittest file overall
     genList.extend(mutatedList)
     
-    cycle_fitness.append(gui_test(mutatedList, 0, coords0, coords1))
+    cycle_fitness.extend(gui_test(mutatedList, 0, coords0, coords1))
     ls.extend(mutatedList)
     
     tmpList.clear()
@@ -630,9 +631,9 @@ if __name__ == "__main__":
     
         carrierList = carrier(genList, ls, first, num)    #performs combination
         genList.extend(carrierList)
-        ls, c_f = helper_function(ls, carrierList, cycle_fitness, num, coords0, coords1)   #testing and getting scores of those combinations
-        cycle_fitness = [s for s in c_f if s != []]
-    
+        ls, cycle_fitness = helper_function(ls, carrierList, cycle_fitness, num, coords0, coords1)   #testing and getting scores of those combinations
+        #cycle_fitness = [s for s in c_f if s != []]
+        
         sortedScoring.extend(cycle_fitness)
         
         ls, sortedScoring, genList = death(ls, sortedScoring, genList, first)
@@ -647,6 +648,7 @@ if __name__ == "__main__":
         
     print("Cleaning up and generating graphs...")
     sortedScoring = sort_scores(sortedScoring)
+    
     ten = int(len(sortedScoring)*0.3)
     first = max(sortedScoring, key=lambda item:item[0])[1]
     #bottom = get_bottom_10(ten)
