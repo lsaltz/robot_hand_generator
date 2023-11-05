@@ -306,9 +306,9 @@ Gets list of top ten
 Parameters:
     ten_num: numerical amount of 10% of grippers generated
 """    
-def get_top_10(ten_num):
+def get_top_10(sortedScoring):
     top_ten = []
-    top_ten.extend(sortedScoring[0-ten_num:])
+    top_ten.extend(sortedScoring[-50:])
     return top_ten
 
 """
@@ -492,6 +492,10 @@ def plot_fitness(generational_fitness, generations):
     plt.title("Max fitness of each generation")
     generational_fitness = list(generational_fitness)
     plt.plot(epochs, generational_fitness, color='blue', linestyle='solid')
+    with open("../output/generational.json", mode="w") as resultsFile:
+        new_j = json.dumps(list(zip(epochs, generational_fitness)))
+        resultsFile.write(new_j)
+    resultsFile.close()
     plt.savefig("../output/fitness_trend")
 
 """
@@ -649,10 +653,10 @@ if __name__ == "__main__":
     print("Cleaning up and generating graphs...")
     sortedScoring = sort_scores(sortedScoring)
     
-    ten = int(len(sortedScoring)*0.3)
+    
     first = max(sortedScoring, key=lambda item:item[0])[1]
     #bottom = get_bottom_10(ten)
-    top = get_top_10(ten)
+    top = get_top_10(sortedScoring)
     #get_from_database(bottom, connection1, first)
     get_from_database(top, connection1, first)
     #generate_ten_perc_graphs(bottom)
