@@ -9,7 +9,7 @@ import copy
 
 class Mutate:
 
-    def __init__(self, robot_gripper, data, generation):
+    def __init__(self, robot_gripper, data, generation, number):
         
         self.hand_data = Dict()
         self.upper = 10
@@ -18,6 +18,7 @@ class Mutate:
         self.robot_gripper = robot_gripper
         self.data = data
         self.generation = generation
+        self.number = number
         
     def mutation_ratios(self):
         ratio = np.random.randint(self.lower, self.upper)
@@ -97,7 +98,7 @@ class Mutate:
         
     def build_hand(self):
         
-        file_name = "hand_mut_gen_" + str(self.generation)
+        file_name = "hand_mut_gen_" + str(self.generation) + "_" + str(self.number)
         
         palmz = 0.053
         palmx = 0.032
@@ -107,10 +108,11 @@ class Mutate:
         
         #palm = self.mutation_ratios()
         #fingers = self.mutation_ratios()
-        right = self.mutation_ratios()
-        left = self.mutation_ratios()
+        right = self.data.ratio.finger_0
+        left = self.data.ratio.finger_1
         
         palm_width = self.data.length.palm
+        
         fingers_total_length = 0.288
         finger_0_length = fingers_total_length/(right+left) * right
         finger_1_length = fingers_total_length - finger_0_length
@@ -142,7 +144,7 @@ class Mutate:
         jfile.close()       
         
         self.robot_gripper.clear()  
-        print(self.hand_data)      
+              
         return self.hand_data
             
     

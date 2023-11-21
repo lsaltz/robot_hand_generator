@@ -126,9 +126,9 @@ class sim_tester():
             p.resetJointState(gripper, max_link_0+1, targetValue=((3*math.pi)/4))
             p.resetJointState(gripper, max_link_0+2, targetValue=-(math.pi/2))
             
-            idealJointPoses1 = p.calculateInverseKinematics(gripper, max_link_1, co1[i], maxNumIterations=5000)
+            idealJointPoses1 = p.calculateInverseKinematics(gripper, max_link_1, co1[i], maxNumIterations=3000)
             
-            idealJointPoses0 = p.calculateInverseKinematics(gripper, max_link_0, co0[i], maxNumIterations=5000)
+            idealJointPoses0 = p.calculateInverseKinematics(gripper, max_link_0, co0[i], maxNumIterations=3000)
             
             
             for j in range(max_link_0+1):

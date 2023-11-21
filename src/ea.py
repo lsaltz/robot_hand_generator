@@ -23,12 +23,24 @@ Returns copy files from overall list
 Parameters:
     ls: total list of grippers
 """
-def return_duplicates(ls):    #TODO: EDIT THIS FOR NEW DICTIONARY RATIOS AFTER KANDK MEASUREMENTS
+#def return_duplicates(ls):    
+"""
     new_ls = [l.to_dict() for l in ls]
     df = pd.DataFrame(new_ls)
     dup = df[df[['ratio']].duplicated(keep='last') == True]
     dupDics = dup.to_dict('records')
-    return dupDics
+"""
+def return_duplicates(ls):    
+    lis = copy.deepcopy(ls)
+    names = [l.pop('name') for l in lis]
+    dup_names = []
+    for l in range(len(ls)):
+        for j in range(l+1, len(ls)):
+            if ls[l].items() == ls[j].items():
+                dup_names.append(names[j])
+    
+    
+    return dup_names
     
 """
 Kills the copies and weaker grippers
@@ -42,18 +54,19 @@ def death(ls, fitness, genList, first):
     weak_name = []
     copied_fitness = copy.deepcopy(fitness)
     dups = return_duplicates(ls)
-    if dups is not None:
+    
+    if len(dups) > 0:
         for d in dups:
-            name = d['name']
-            if f'{name}.json' != first:
+            name = d
+            if name != first:
                 for t in copied_fitness or t == []:
                     if f'{name}.json' == t[1]:
                         copied_fitness.remove(t)
                 for l in ls:
-                    if d['name'] == l['name'] or l == []:
+                    if d == l['name'] or l == []:
                         ls.remove(l)
                 for g in genList or g == []:
-                    if d['name'] == g['name']:
+                    if d == g['name']:
                         genList.remove(g)
                 path1 = f"../output/{name}"
                 path2 = f"../points/{name}.json"
@@ -64,6 +77,7 @@ def death(ls, fitness, genList, first):
                     os.remove(path2)
                 if os.path.exists(path3):
                     os.remove(path3)
+    
     """
     for i in copied_fitness:
         if i[0] == 0:
@@ -114,9 +128,11 @@ Parameters:
 def add_to_database(genList, connection1, connection2, first):
     cursor1 = connection1.cursor()
     cursor2 = connection2.cursor()
+    
     for i in range(len(genList)):
         if genList[i].name + '.json' != str(first):
             f_name = genList[i].name + ".json"
+            
             jfile1 = f"../points/{genList[i].name}.json"
             bin1 = json_to_binary(jfile1)
             cursor1.execute("insert into hand_data (ID, name, data) values(?,?,?)",(i, f_name, bin1))
@@ -138,8 +154,8 @@ Parameters:
 def get_from_database(ten_list, connection, first):
     cr = connection.cursor()
     for t in ten_list:
-        f_name = t[1]
-        if f_name != str(first):
+        f_name = t
+        if f"{f_name}.json" != str(first):
             cr.execute("select data from hand_data where name=?", (f_name,))
             connection.commit()
             for row in cr:
@@ -186,14 +202,15 @@ def carrier(genList, ls, first, generation):    ###
      oddDics = []
      evenDics = []
      newList = []
-     fittest_dic = next((d for d in ls if (d['name']+'.json') == first), None)
+     fittest_dic = next((d for d in ls if d['name'] == first), None)
      name = fittest_dic['name']
      fittest_file =f'../output/{name}/{name}.json'
-     
+     print(len(genList))
      for l in range(len(genList)):
          recipient_dic = genList[l]
          newList.extend(crossover(fittest_dic, recipient_dic, generation, "w", l))
-     #carriedList = death(newList)
+         print(l)
+     print(newList)
      
      main.MainScript()
      for c in range(len(newList)):     
@@ -204,6 +221,7 @@ def carrier(genList, ls, first, generation):    ###
              
      for m in range(min(len(evenDics), len(oddDics))):
          newList.extend(crossover(evenDics[m], oddDics[m], generation, "eo", m))
+         
      #returned_List = death(carriedList)
      
      main.MainScript()
@@ -245,6 +263,17 @@ def gui_test(dicList, num, coords0, coords1):####
         
     return tmpFitness
 
+def final_test(dicList, num, coords0, coords1):####
+    tmpFitness = []
+    
+    for l in dicList:
+        name = l
+        rt = f"../output/{name}/hand"
+        sim_test = testing.sim_tester(name, rt, l, coords0, coords1)
+        tmpFitness.append(sim_test.gui_test())
+        
+    return tmpFitness    
+
 """
 Sorts scores
 Parameters:
@@ -262,22 +291,22 @@ Parameters:
     first: gripper with highest fitness score
     num: generation number
 """
-def mut_on_first(tomutate, first, num):
+def mut_on_first(tomutate, file_to_mutate, num, i):
     firstList = []
     
     
     c = combination.crossoverFunctions(num)
     for l in tomutate:
-        if (str(l['name']) + ".json") == str(first):
+        if str(l['name']) == str(file_to_mutate):
             m0 = l
     
-    m_d = c.json_to_dictionaries(f"../hand_json_files/hand_archive_json/{first}")
-    m = mutations.Mutate(m_d, m0, num)
+    m_d = c.json_to_dictionaries(f"../hand_json_files/hand_archive_json/{file_to_mutate}.json")
+    m = mutations.Mutate(m_d, m0, num, i)
     firstList.append(m.build_hand())
-    
     main.MainScript()
     return firstList
-    
+ 
+ 
 """
 Gets numerical amount of 10% of overall number of hands
 Parameters:
@@ -309,6 +338,9 @@ Parameters:
 def get_top_10(sortedScoring):
     top_ten = []
     top_ten.extend(sortedScoring[-50:])
+    print(top_ten)
+    top_ten = list(map(lambda x:x[1].split('.')[0], top_ten))
+    print(top_ten)
     return top_ten
 
 """
@@ -457,17 +489,13 @@ def write_to_file(ls, fittestFirst, sortedScoring, top_10):#, bottom_10):
     for i in range(len(ls)):
         if ls[i].name == str(fittestFirst.split('.')[0]):
             winning_ratios = ls[i]
-    for i in range(len(top_10)):
-        winning_file_names.append(top_10[i][1].split('.')[0])
+    winning_file_names = top_10
     for x in range(len(ls)):
         if ls[x].name in winning_file_names:
               winning_10_ratios.append(ls[x])    
     with open("../output/results.txt", mode="w") as resultsFile:
         resultsFile.write("The fittest of them all is: " + str(fittestFirst) + "\n")
-        resultsFile.write("It's winning ratios are: "+ "\n")
-        resultsFile.write(f"Palm: {winning_ratios.palm} To Fingers: {winning_ratios.fingers} and Proximal: {winning_ratios.proximal} To Distal: {winning_ratios.distal}\n")
-        resultsFile.write("Location is: " + str(rt) + "\n")
-        resultsFile.write("Overall top 10% results are: \n" + str(top_10) + "\n")
+        resultsFile.write("Overall top 50 results are: \n" + str(sortedScoring[-50:]) + "\n")
         for j in range(len(winning_10_ratios)):
             resultsFile.write(f"{winning_10_ratios[j]}\n")
         #resultsFile.write("Overall bottom 10% results are: \n" + str(bottom_10) + "\n")
@@ -492,12 +520,11 @@ def plot_fitness(generational_fitness, generations):
     plt.title("Max fitness of each generation")
     generational_fitness = list(generational_fitness)
     plt.plot(epochs, generational_fitness, color='blue', linestyle='solid')
+    plt.savefig("../output/fitness_trend")
     with open("../output/generational.json", mode="w") as resultsFile:
         new_j = json.dumps(list(zip(epochs, generational_fitness)))
         resultsFile.write(new_j)
     resultsFile.close()
-    plt.savefig("../output/fitness_trend")
-
 """
 Tests hands and alters lists
 Parameters:
@@ -520,11 +547,11 @@ def helper_function(ls, tmpList, cycle_fitness, num, coords0, coords1):
 """
 Generates a coordinate array to test hands on
 """
-def coordinate_array():
-    finger_z = 0.3
-    val = 0.03
+def coordinate_array(val):
+    finger_z = 0.2
     
-    total_height = 0.288
+    
+    total_height = 0.2
     coords1 = []
     coords2 = []
     bottom_x = -abs(total_height)
@@ -572,8 +599,8 @@ if __name__ == "__main__":
     cr1.execute("create table hand_data (ID, name, data)")
     cr2.execute("create table hand_files (ID, name, data)")
     print("generating coordinate array...")
-    
-    coords0, coords1 = coordinate_array()
+    val = 0.05
+    coords0, coords1 = coordinate_array(val)
     
     ls = []    #total list of grippers
     cycle_fitness = []
@@ -584,50 +611,66 @@ if __name__ == "__main__":
     generational_fitness = []
     tmpList = []
     combine = combination.crossoverFunctions(0)
-    g0 = first_generation.First_Generation(0)
-    tmpList.append(g0.build_hand())
+    for n in range(50):
+        g0 = first_generation.First_Generation(0, n)
+        tmpList.append(g0.build_hand())
     main.MainScript() 
     genList.extend(tmpList)
     
     cycle_fitness.extend(gui_test(tmpList, 0, coords0, coords1))
     ls.extend(tmpList)
     
+    
+    
+    first = max(cycle_fitness, key=lambda item:item[0])[1].split(".")[0]
+    mx = 10
+    mut_ran = []
+    for i in range(mx):
+        mut_ran.extend(mut_on_first(ls, ls[random.randint(0,len(ls)-1)].name, 0, i))
+    mutatedList = mut_on_first(ls, first, 0, "f")   #performs mutations on first fittest file overall
+    genList.extend(mut_ran)
+    genList.extend(mutatedList)
+    
+    
+    cycle_fitness.extend(gui_test(mut_ran, 0, coords0, coords1))
+    cycle_fitness.extend(gui_test(mutatedList, 0, coords0, coords1))
+    
+    ls.extend(mutatedList)
+    ls.extend(mut_ran)
+    
     sortedScoring.extend(cycle_fitness)
     
     first = max(sortedScoring, key=lambda item:item[0])[1]
-    
-    mutatedList = mut_on_first(ls, first, 0)   #performs mutations on first fittest file overall
-    genList.extend(mutatedList)
-    
-    cycle_fitness.extend(gui_test(mutatedList, 0, coords0, coords1))
-    ls.extend(mutatedList)
-    
-    tmpList.clear()
-    sortedScoring.extend(cycle_fitness[1:])
-    
-    first = max(sortedScoring, key=lambda item:item[0])[1]
 
-    mutatedList.clear()
-    add_to_database(genList, connection1, connection2, first)
+    
+    ls, sortedScoring, genList = death(ls, sortedScoring, genList, first)
+    
+    
     fitnesses = copy.deepcopy([t[0] for t in cycle_fitness])
     generational_fitness.append(max(fitnesses))
     cycle_fitness.clear()
     fitnesses.clear()
-    genList.clear()    
+    
+    mutatedList.clear() 
+    tmpList = copy.deepcopy(genList)
+    
     for num in range(1, gen):
         genList = []
         cycle_fitness = []
         fitnesses = []
         
-        first = max(sortedScoring, key=lambda item:item[0])[1]
+        first = max(sortedScoring, key=lambda item:item[0])[1].split('.')[0]
         
         combine = combination.crossoverFunctions(num)    #set up crossover class
         
-        main.MainScript()                                                              #run mainscript to generate URDF files
-        genList.extend(tmpList)
-        ls, cycle_fitness = helper_function(ls, tmpList, cycle_fitness, num, coords0, coords1)   #testing getting scores of brand new hands generated   
         
-        mutatedList = mut_on_first(ls, first, num)    #performs mutations on first fittest file overall
+          
+        
+        mut_ran = []
+        for i in range(mx):
+            mut_ran.extend(mut_on_first(tmpList, tmpList[random.randint(0,len(tmpList)-1)].name, num, i))
+        mutatedList = mut_on_first(ls, first, num, "f")   #performs mutations on first fittest file overall
+        genList.extend(mut_ran)
         genList.extend(mutatedList)
         
         ls, cycle_fitness = helper_function(ls, mutatedList, cycle_fitness, num, coords0, coords1)    #testing and getting scores of mutated hands
@@ -636,7 +679,7 @@ if __name__ == "__main__":
         carrierList = carrier(genList, ls, first, num)    #performs combination
         genList.extend(carrierList)
         ls, cycle_fitness = helper_function(ls, carrierList, cycle_fitness, num, coords0, coords1)   #testing and getting scores of those combinations
-        #cycle_fitness = [s for s in c_f if s != []]
+        
         
         sortedScoring.extend(cycle_fitness)
         
@@ -644,26 +687,39 @@ if __name__ == "__main__":
         
         
         
-        first = max(sortedScoring, key=lambda item:item[0])[1]
-        add_to_database(genList, connection1, connection2, first)
+        first = max(sortedScoring, key=lambda item:item[0])[1].split('.')[0]
+        
     
         fitnesses = copy.deepcopy([t[0] for t in cycle_fitness])
         generational_fitness.append(max(fitnesses))   #get max fitness of that generation
+        tmpList = copy.deepcopy(genList)
+        genList.clear()
+        fitnesses.clear()
+        cycle_fitness.clear()
         
-    print("Cleaning up and generating graphs...")
+    
     sortedScoring = sort_scores(sortedScoring)
     
-    
+    #ten = int(len(sortedScoring)*0.3)
     first = max(sortedScoring, key=lambda item:item[0])[1]
+    add_to_database(genList, connection1, connection2, first)
     #bottom = get_bottom_10(ten)
+    new_fitness = []
     top = get_top_10(sortedScoring)
+    
+    coords0, coords1 = coordinate_array(0.03)
+    
+    new_fitness.extend(final_test(top, 0, coords0, coords1))
+    first = max(new_fitness, key=lambda item:item[0])[1]
+    new_fitness = sort_scores(new_fitness)
     #get_from_database(bottom, connection1, first)
     get_from_database(top, connection1, first)
     #generate_ten_perc_graphs(bottom)
-    generate_ten_perc_graphs(top)
-    overall_graph(top)
+    #generate_ten_perc_graphs(top)
+    #overall_graph(top)
     connection1.close()
     connection2.close()
-    write_to_file(ls, first, sortedScoring, top) #bottom)
+    print("Cleaning up and generating graphs...")
+    write_to_file(ls, first, new_fitness, top) #bottom)
     plot_fitness(generational_fitness, gen)
-    open_file(first)
+    open_file(first).json

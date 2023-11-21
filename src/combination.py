@@ -69,32 +69,52 @@ class crossoverFunctions:
         child.hand[finger][segment].segment_top_joint.joint_friction = "n/a"
         child.hand[finger][segment].segment_sensors.sensor_qty = 0
         child.update()
-         
-    def build_fingers(self, ls0, ls1, totalfingerlength, finger, child, hand_data):
-        seg_ratios = []
-        num_segs = len(ls0) + 1
-        if len(ls0) == len(ls1):
-            seg_ratios = copy.deepcopy(ls0)
-            for i in range(len(ls0)):
-                seg = f"segment_{i}"
-                child.hand[finger][seg].segment_dimensions = 0.0322, 0.0165, (ls0[i] * totalfingerlength)/100
         
-        else:
+    def last_link(self, finger, child, i):
+        segment = f"segment_{i}"
+        
+        child.hand[finger][segment].segment_profile = [0, 0.0, 0], [0, 0.0, 0],[0, 0.0, 0.01], [0, 0.0, 0.01]
+       	child.hand[finger][segment].segment_dimensions = 0, 0, 0    	
+        child.hand[finger][segment].segment_bottom_joint.joint_style = "pin"
+        child.hand[finger][segment].segment_bottom_joint.joint_dimensions = 0,0,0	#return to this
+        child.hand[finger][segment].segment_bottom_joint.joint_range = 0, 180
+       	child.hand[finger][segment].segment_bottom_joint.joint_friction = "n/a"
+       	
+       	child.hand[finger][segment].segment_sensors.sensor_qty = 0
+       	   
+    def build_fingers(self, ls0, ls1, totalfingerlength, finger, child, hand_data, parent):
+        seg_ratios = []
+        num_segs = len(ls0)+1
+        #choice = random.randint(1,2)
 
-            seg_ratios = self.determine_seg_ratios(finger, num_segs)
+        seg_ratios = self.determine_seg_ratios(finger, num_segs)
         
             
+            
+        child.hand[finger].clear()
+        child.hand[finger].segment_qty = num_segs
         
-            for i in range(len(seg_ratios)):
-                link_length = (totalfingerlength*seg_ratios[i])/100
-                self.build_finger(finger, i, link_length, child)
+            
+        for i in range(num_segs-1):
+            link_length = (totalfingerlength*seg_ratios[i])/100
+            self.build_finger(finger, i, link_length, child)
+        self.last_link(finger, child, len(seg_ratios))
         hand_data[finger].num_segs = num_segs
         hand_data.ratio.segs[finger] = seg_ratios
         
         hand_data.update()
         child.update()
-        return child    
+        return child   
     
+            
+    def choose_palm_width(self, p):
+        choice = random.randint(1,3)
+        if choice == 1:
+            palm_width = p.length.palm
+        else:
+            palm_width = round(random.uniform(0.05, 0.09), 5)
+        return palm_width
+        
     def combo(self, parent1, parent2, p0, p1, num, n, nu):
         hand_data0 = Dict()
         hand_data1 = Dict()
@@ -102,7 +122,8 @@ class crossoverFunctions:
         c0 = copy.deepcopy(parent1)
         c1 = copy.deepcopy(parent2)
         
-         
+        palmz = 0.053
+        palmx = 0.032
         
         c0.hand.hand_name = "child_0_" + str(num) + "_" + str(nu) + n
         c1.hand.hand_name = "child_1_" + str(num) + "_" + str(nu) + n
@@ -119,12 +140,12 @@ class crossoverFunctions:
         hand_data0.finger_1.num_segs = num_segs_1
         """
         
-        p0f0 = p0.ratio.finger_0
+        p0f0 = random.randint(1,10)
         p0f1 = p0.ratio.finger_1
         
         
         p1f0 = p1.ratio.finger_0
-        p1f1 = p1.ratio.finger_1
+        p1f1 = random.randint(1,10)
         
         
         fingers_length_0 = 0.288
@@ -141,23 +162,36 @@ class crossoverFunctions:
         """
         
         
-        c0 = self.build_fingers(p1.ratio.segs.finger_0, p0.ratio.segs.finger_0, finger_0_0, "finger_0", c0, hand_data0)
-        
-        c1 = self.build_fingers(p0.ratio.segs.finger_1, p1.ratio.segs.finger_1, finger_1_1, "finger_1", c1, hand_data1)
-        
-         
-        hand_data0.ratio.segs.finger_1 = p0.ratio.segs.finger_1
+        c0 = self.build_fingers(p1.ratio.segs.finger_0, p0.ratio.segs.finger_0, finger_0_0, "finger_0", c0, hand_data0, parent1)
         hand_data0.finger_1.num_segs = p0.finger_1.num_segs
+        
+        hand_data0.ratio.segs.finger_1 = p0.ratio.segs.finger_1
+        c1 = self.build_fingers(p0.ratio.segs.finger_1, p1.ratio.segs.finger_1, finger_1_1, "finger_1", c1, hand_data1, parent2)
+        
+        hand_data1.finger_0.num_segs = p1.finger_0.num_segs 
         hand_data1.ratio.segs.finger_0 = p1.ratio.segs.finger_0
-        hand_data1.finger_0.num_segs = p1.finger_0.num_segs
+        
+        
+        
         hand_data0.ratio.finger_0 = p0f0
         hand_data0.ratio.finger_1 = p0f1
-        hand_data0.length.palm = p1.length.palm
+        
+        hand_data0.length.palm = self.choose_palm_width(p1)
+        c0.hand.palm.palm_dimensions = palmx, hand_data0.length.palm, palmz
+        c0.hand.palm.finger_0.joint_pose = hand_data0.length.palm/2, 0, 0
+        c0.hand.finger_0.finger_pose = c0.hand.palm.finger_0.joint_pose
+        c0.hand.palm.finger_1.joint_pose = hand_data0.length.palm/2, 180, -180
+        c0.hand.finger_1.finger_pose = c0.hand.palm.finger_1.joint_pose 
         hand_data0.length.finger_0 = finger_0_0
         hand_data0.length.finger_1 = finger_0_1
         hand_data1.ratio.finger_0 = p1f0
         hand_data1.ratio.finger_1 = p1f1
-        hand_data1.length.palm = p0.length.palm
+        hand_data1.length.palm = self.choose_palm_width(p0)
+        c1.hand.palm.palm_dimensions = palmx, hand_data1.length.palm, palmz
+        c1.hand.palm.finger_0.joint_pose = hand_data1.length.palm/2, 0, 0
+        c1.hand.finger_0.finger_pose = c1.hand.palm.finger_0.joint_pose
+        c1.hand.palm.finger_1.joint_pose = hand_data1.length.palm/2, 180, -180
+        c1.hand.finger_1.finger_pose = c1.hand.palm.finger_1.joint_pose
         hand_data1.length.finger_0 = finger_1_0
         hand_data1.length.finger_1 = finger_1_1
         
@@ -166,13 +200,13 @@ class crossoverFunctions:
         hand_data0.name = c0.hand.hand_name
         
         hand_data1.name = c1.hand.hand_name
-        
+        c1.update()
+        c0.update()
         hand_data0.update()
         hand_data1.update()
         self.write_to_json(c0)
         self.write_to_json(c1)
-        print(hand_data0)
-        print(hand_data1)
+        
         return hand_data0, hand_data1
     
     

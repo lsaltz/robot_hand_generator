@@ -9,13 +9,14 @@ import copy
 
 class First_Generation:
 
-    def __init__(self, generation):
+    def __init__(self, generation, n):
         self.upper = 10
         self.lower = 1
         self.total_size = 0.36
         self.robot_gripper = Dict()
         self.generation = generation
         self.hand_data = Dict()
+        self.n = n
         
     def mutation_ratios(self):
         ratio = np.random.randint(self.lower, self.upper)
@@ -96,7 +97,7 @@ class First_Generation:
         
     def build_hand(self):
           
-        file_name = "hand_init" +  '_gen_' + str(self.generation)
+        file_name = "hand_init" +  '_gen_' + str(self.generation) + "_" + str(self.n)
         
         palmz = 0.053
         palmx = 0.032
@@ -132,7 +133,7 @@ class First_Generation:
         self.hand_data.length.finger_0 = finger_0_length
         self.hand_data.length.finger_1 = finger_1_length
         self.hand_data.update()
-        print(self.hand_data)
+        
         with open('../hand_json_files/hand_queue_json/' + file_name + '.json', mode="w+") as jfile:        
             new_json = ""
             new_json += json.dumps(self.robot_gripper, indent=4)
