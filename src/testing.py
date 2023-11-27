@@ -20,7 +20,7 @@ import numpy as np
 class sim_tester():
     
 
-    def __init__(self, name, rt, ls, coords0, coords1):
+    def __init__(self, name, rt, ls, coords0, coords1, letter):
         self.gripper_loc = rt
         self.gripper_name = name
         self.ls = ls
@@ -28,6 +28,7 @@ class sim_tester():
         self.coo0 = coords0
         self.coo1 = coords1
         self.directory = os.path.dirname(__file__)
+        self.letter = letter
         
     def initialize_environment(self, loc, name):
         pc = bc.BulletClient(connection_mode=p.DIRECT)    #or GUI for visual (slower)
@@ -188,7 +189,7 @@ class sim_tester():
         gripper_vals.finger_0.not_reached = nr_R
         gripper_vals.finger_1.not_reached = nr_L
         
-        with open(f"../points/{self.gripper_name}.json", "w") as f:
+        with open(f"../points/{self.gripper_name}_{self.letter}.json", "w") as f:
             new_json = ""
             new_json += json.dumps(gripper_vals, indent=4)
             f.write(new_json)

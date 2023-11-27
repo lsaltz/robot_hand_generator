@@ -258,7 +258,7 @@ def gui_test(dicList, num, coords0, coords1):####
     for l in dicList:
         name = l['name']
         rt = f"../output/{name}/hand"
-        sim_test = testing.sim_tester(name, rt, l, coords0, coords1)
+        sim_test = testing.sim_tester(name, rt, l, coords0, coords1, "t")
         tmpFitness.append(sim_test.gui_test())
         
     return tmpFitness
@@ -269,7 +269,7 @@ def final_test(dicList, num, coords0, coords1):####
     for l in dicList:
         name = l
         rt = f"../output/{name}/hand"
-        sim_test = testing.sim_tester(name, rt, l, coords0, coords1)
+        sim_test = testing.sim_tester(name, rt, l, coords0, coords1, "f")
         tmpFitness.append(sim_test.gui_test())
         
     return tmpFitness    
@@ -562,22 +562,31 @@ def coordinate_array(val):
     column_points = int(column_length/val)
     n = 8
     rad = 0.019
+    
     center_pt = [[x, y, 0] for x in np.linspace(bottom_x, finger_z, num=row_points) for y in np.linspace(bottom_y, finger_z, num=column_points)]
-    #center_pt = [0.3, 0.3, 0]
+    
     x1 = [(c[0] + (np.cos(2*np.pi/n*x)*rad)) for c in center_pt for x in range(0, n+1)]
-    #x1 = [center_pt[0] + (np.cos(2*np.pi/n*x)*rad) for x in range(0, n+1)]
-    #y1 = [center_pt[1] + (np.sin(2*np.pi/n*x)*rad)) for x in range(0, n+1)]
+    
+   
     y1 = [(c[1] + (np.sin(2*np.pi/n*x)*rad)) for c in center_pt for x in range(0, n+1)]
     z1 = np.linspace(0, 0, len(x1))
     coords1 = list(zip(x1, y1, z1))
     x2 = [(c[0] + (np.cos(2*np.pi/n*x+np.pi)*rad)) for c in center_pt for x in range(0, n+1)]
     y2 = [(c[1] - (np.sin(2*np.pi/n*x+np.pi)*rad)) for c in center_pt for x in range(0, n+1)]
-    #x2 = [center_pt[0] + ((np.cos(2*np.pi/n*x)*rad)+np.pi) for x in range(0, n+1)]
-    #y2 = [center_pt[1] + ((np.sin(2*np.pi/n*x)*rad)+np.pi) for x in range(0, n+1)]
+    
     z2 = np.linspace(0, 0, len(x2))
     coords2 = list(zip(x2, y2, z2))
-    return(coords1, coords2)
-
+    c1 = np.reshape(np.asarray(coords1), (-1, n+1, 3)).tolist()
+    
+    c2 = np.reshape(np.asarray(coords2), (-1, n+1, 3)).tolist()
+    
+    c = []
+    
+    for i in range(len(center_pt)):
+        c3 = [center_pt[i], c1[i], c2[i]]
+        c.append(c3)
+     
+    return coords1, coords2, center_pt, c
     
 
 
@@ -600,7 +609,7 @@ if __name__ == "__main__":
     cr2.execute("create table hand_files (ID, name, data)")
     print("generating coordinate array...")
     val = 0.05
-    coords0, coords1 = coordinate_array(val)
+    coords0, coords1, center, c = coordinate_array(val)
     
     ls = []    #total list of grippers
     cycle_fitness = []
@@ -693,6 +702,7 @@ if __name__ == "__main__":
         fitnesses = copy.deepcopy([t[0] for t in cycle_fitness])
         generational_fitness.append(max(fitnesses))   #get max fitness of that generation
         tmpList = copy.deepcopy(genList)
+        #add_to_database(genList, connection1, connection2, first)
         genList.clear()
         fitnesses.clear()
         cycle_fitness.clear()
@@ -702,18 +712,18 @@ if __name__ == "__main__":
     
     #ten = int(len(sortedScoring)*0.3)
     first = max(sortedScoring, key=lambda item:item[0])[1]
-    add_to_database(genList, connection1, connection2, first)
+    #add_to_database(genList, connection1, connection2, first)
     #bottom = get_bottom_10(ten)
     new_fitness = []
     top = get_top_10(sortedScoring)
     
-    coords0, coords1 = coordinate_array(0.03)
+    coords0, coords1, center, c = coordinate_array(0.03)
     
     new_fitness.extend(final_test(top, 0, coords0, coords1))
     first = max(new_fitness, key=lambda item:item[0])[1]
     new_fitness = sort_scores(new_fitness)
     #get_from_database(bottom, connection1, first)
-    get_from_database(top, connection1, first)
+    #get_from_database(top, connection1, first)
     #generate_ten_perc_graphs(bottom)
     #generate_ten_perc_graphs(top)
     #overall_graph(top)
