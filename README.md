@@ -3,16 +3,10 @@
 A tool used to generate the best symmetrical two-fingered hand design to pick up and hold onto a cube. Currently tests the hand's range of motion while maintaining x distance between distal links.
 
 ## Requirements:
-
-- Blender 2.93 (only version tested on possibly will work on newer versions)
 - Linux OS or WSL with ubuntu
-- PyBullet for simple visaulization and joint checking
-- Python 3.6+
-- MatPlotLib
-- Pandas
 
 
-## Install and Setup(git pull):
+## Install and Setup:
 Ubuntu is currently the only tested method for executing this program.
 
 
@@ -25,32 +19,25 @@ Ubuntu is currently the only tested method for executing this program.
     sudo apt upgrade
     ```
     Next, copy the following lines into the terminal:
-    
-    ```console
-    /bin/bash -c 'mkdir ~/software; \
-    cd ~/software; \
-    wget https://oregonstate.box.com/shared/static/895kxxvztksqcbjmlzyq7jg1flslseru.xz; \
-    tar xf 895kxxvztksqcbjmlzyq7jg1flslseru.xz;\
-    mv blender-2.93.7-linux-x64 ./blender-2.93; \
-    echo "alias blender="~/software/blender-2.93/blender"" >> ~/.bashrc; \
-    source ~/.bashrc; \
-    sudo apt update; sudo apt install -y python3-pip;\
-    cd ~/ ; git clone https://github.com/lsaltz/robot_hand_generator_MLS.git;\
-    cd ~/robot_hand_generator_MLS/; pip3 install -r requirements.txt;\
-    pip3 install pybullet;\
-    pip3 install addict;\
-    cd ~/software/; git clone https://github.com/bulletphysics/bullet3.git; cd ./bullet3/; python3 setup.py build; python3 setup.py install;\
-    ~/software/blender-2.93/2.93/python/bin/python3.9 -m ensurepip;\
-    ~/software/blender-2.93/2.93/python/bin/python3.9 -m pip install upgrade pip;\
-    ~/software/blender-2.93/2.93/python/bin/python3.9 -m pip install numpy;\
-    ~/software/blender-2.93/2.93/python/bin/python3.9 -m pip install pathlib;\
-    cd ~/robot_hand_generator_MLS/; python3 first_run.py 0 ~/software/blender-2.93/blender;\
-    '
+    ```
+    cd ~/
+    ```
+    ```
+    git clone https://github.com/lsaltz/robot_hand_generator_MLS.git
+    ```
+    ```
+    cd ~/robot_hand_generator_MLS/
+    ```
+    ```
+    chmod u+x setup.sh
+    ```
+    ```
+    ./setup.sh
     ```
 
     * This will set up the environment.
     
-2. To run the evolutionary algorithm, open:
+2. After the environment has finished setting up (this will take some time), run the evolutionary algorithm, open:
 
     ```console
     cd ~/robot_hand_generator_MLS/src/
@@ -104,7 +91,6 @@ Currently the maximum amount of times this code has been run is 25. I plan to ru
 
 ## Todo:
 - Optimize
-- Create setup script
 - Run 500+ times
 
 
@@ -115,4 +101,3 @@ export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
 ```
 This project was originally created by Josh Campbell, and has been adjusted by me. The original repository can be found at:
 https://github.com/OSUrobotics/robot_hand_generator
-

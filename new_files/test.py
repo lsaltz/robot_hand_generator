@@ -9,11 +9,7 @@ import matplotlib.patches as patches
 
 """
 TODO:
-1. check limits with graphing
-2. cut back on redundant code
-3. run 500x
-4. figure out how to measure rotation (while running)
-5. clean up sim test
+3. integrate, loop through dictionaries of fingers, etc.
 """
 
 
@@ -21,18 +17,17 @@ TODO:
 
 class WorkSpace_Test:
 
-    def __init__(self, links, width, finger_name, points):
-        self.link0 = links[0]
-        self.link1 = links[1]
-        self.link2 = links[2]
+    def __init__(self, link0, link1, link2, width, finger_name):
+        self.link0 = link0
+        self.link1 = link1
+        self.link2 = link2
         self.finger_name = finger_name
         self.width = width
-        self.points = points
         self.N = 100
         self.cube = 0.039
-        self.inside_points = []
-        self.outside_points = []
-        
+
+        theta1 = -45
+        theta2 = 135
         
         
     def decide_angles(self):
@@ -45,7 +40,6 @@ class WorkSpace_Test:
             theta2 = 225
             
         return theta1, theta2
-        
     
     def make_angle_arrays(self, theta1, theta2):
         
@@ -55,7 +49,6 @@ class WorkSpace_Test:
         theta_arr = theta_arr * np.pi/180
         
         return theta_arr, theta_rad 
-        
     
     def build_workspace_right(self, theta_arr, theta_rad):
     
@@ -87,32 +80,30 @@ class WorkSpace_Test:
                 
         return x_arr, y_arr
        
-             
+               
     def main(self):
     
         theta1, theta2 = self.decide_angles()
         theta_arr, theta_rad = self.make_angle_arrays(theta1, theta2)
-        val = 0.03
         
         if self.finger_name == "finger_0":
             x_arr, y_arr = self.build_workspace_right(theta_arr, theta_rad)
-            #points = np.asarray([[x+self.cube, y] for x in np.linspace(bottom_x, top_x, num_points) for y in np.linspace(bottom_y, top_y, num_points)])   
-            inside_indices = self.raycasting(x_arr, y_arr)
+            points = np.asarray([[x+self.cube, y] for x in np.linspace(-0.1, 0.15, 20) for y in np.linspace(-0.1, 0.15, 20)])   
+            inside_indices = self.raycasting(x_arr, y_arr, points)
         else:
             x_arr, y_arr = self.build_workspace_left(theta_arr, theta_rad)   
-            #points = np.asarray([[x, y] for x in np.linspace(bottom_x, top_x, num_points) for y in np.linspace(bottom_y, top_y, num_points)])     #need to determine limits
-            inside_indices = self.raycasting(x_arr, y_arr)
+            points = np.asarray([[x, y] for x in np.linspace(-0.1, 0.15, 20) for y in np.linspace(-0.1, 0.15, 20)])    #need to determine limits
+            inside_indices = self.raycasting(x_arr, y_arr, points)
             
-        return inside_indices, self.points
+        return inside_indices, points
      
             
-    def raycasting(self, x_arr, y_arr):
-        #plt.plot(x_arr.T, y_arr.T, color='blue')
+    def raycasting(self, x_arr, y_arr, points):
+        plt.plot(x_arr.T, y_arr.T, color='blue')
         inside_indices = []
         _eps = 0.00001
         _huge = np.inf
-        for idx, i in enumerate(self.points):
-            
+        for idx, i in enumerate(points):
             inside = 0
             for k,j in enumerate(x_arr):
         
@@ -150,18 +141,14 @@ class WorkSpace_Test:
                         continue
 
             if inside%2 != 0:
-                #self.inside_points.append(i)
                 inside_indices.append(idx)
               
-            #else:
-                #self.outside_points.append(i)
-                #plt.scatter(i[0],i[1], color='red')   
+            else:
+                plt.scatter(i[0],i[1], color='red')   
                        
         return inside_indices
         
         
-     
-            
 class WorkSpace_Fitness:
 
     def __init__(self, inside_indices_0, inside_indices_1, points0, points1):
@@ -173,46 +160,37 @@ class WorkSpace_Fitness:
     def main(self):
     
         idx = [i for i in self.inside_indices_0 if i in self.inside_indices_1]
-        fitness = len(idx)/(len(self.points0))
+        fitness = len(idx)/(len(self.points0)+len(self.points1))
         
-        #for p in idx:
-            #plt.scatter(self.points0[p][0], self.points0[p][1], color='green')           
-            #plt.scatter(self.points1[p][0], self.points1[p][1], color = 'yellow')  
-        #plt.show()    
-        return fitness     
-        
-        
-        
-#class Test_Plotting:
-#    def __init__(self):
-    
-#    def get_points(    
-"""
+        for p in idx:
+            plt.scatter(self.points0[p][0], self.points0[p][1], color='green')           
+            plt.scatter(self.points1[p][0], self.points1[p][1], color = 'yellow')  
+            
+        return fitness         
+
 if __name__ == "__main__":
     
     f0l1 = 0.05904
     f0l2 = 0.0576
     f0l3 = 0.02736
-    links0 = [f0l1, f0l2, f0l3]
     name0 = "finger_0"
 
     f1l1 = 0.0576
     f1l2 = 0.0864
     f1l3 = 0
-    links1 = [f1l1, f1l2, f1l3]
     name1 = "finger_1"
 
     width = 0.05326 
     
-    w = WorkSpace_Test(links0, width, name0)     
+    w = WorkSpace_Test(f0l1, f0l2, f0l3, width, name0)     
     i0, p0 = w.main()
     
-    w2 = WorkSpace_Test(links1, 0, name1)
+    w2 = WorkSpace_Test(f1l1, f1l2, f1l3, 0, name1)
     i1, p1 = w2.main()
     f = WorkSpace_Fitness(i0, i1, p0, p1).main()
     print(f)
-    #plt.show()
-"""    
+    plt.show()
+    
     
     
      

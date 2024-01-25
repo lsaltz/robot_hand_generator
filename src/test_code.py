@@ -3,10 +3,16 @@ import cv2
 import matplotlib.pyplot as plt
 from matplotlib import path
 from matplotlib.lines import Line2D
-
+import main
+import build_hand as bh
 import matplotlib.patches as patches
-
-
+import basic_load
+from addict import Dict
+from pybullet_utils import bullet_client as bc
+import pybullet_data
+import pybullet as p
+import time
+import math
 """
 TODO:
 1. check limits with graphing
@@ -30,16 +36,21 @@ class WorkSpace_Test:
         self.points = points
         self.N = 100
         self.cube = 0.039
+        self.h = 0.032
         self.inside_points = []
         self.outside_points = []
         
         
         
-    def decide_angles(self):
-    
+    def decide_angles(self, index):
         if self.finger_name == "finger_0":
-            theta1 = -45
-            theta2 = 135
+            if index == 0:
+                theta1 = -135
+                theta2 = 135
+            else:
+                theta1 = 0
+                theta2 = 180
+            
         else:
             theta1 = 45
             theta2 = 225
@@ -57,20 +68,39 @@ class WorkSpace_Test:
         return theta_arr, theta_rad 
         
     
-    def build_workspace_right(self, theta_arr, theta_rad):
+    def build_workspace_right(self, theta_arr, theta_arr2, theta_arr3):
     
-        x_arr = np.zeros((2*len(theta_arr), len(theta_arr)))
-        y_arr = np.zeros((2*len(theta_arr), len(theta_arr)))
+        x3 = np.zeros(2*len(theta_arr), len(theta_ar)
+        y3 = np.zeros(2*len(theta_arr))
         
+        """
+        for i in range(len(theta_arr)):
+            
+           
+            for j in range(len(theta_arr2)):
+                x1 = self.link0*np.cos(theta_arr[i])
+                y1 = self.link0*np.sin(theta_arr[i])
+                x2 = x1 + self.link1*np.cos(theta_arr2[j]+theta_arr[i])
+                y2 = y1 + self.link1*np.sin(theta_arr2[j]+theta_arr[i])
+                
+          
+                # if i in(0, 2*len(theta_arr)-1) or j in(0,(len(theta_arr)-1)):
+                    
+                x3[j] = (x2 + self.link2*np.cos(theta_arr3[j] + theta_arr2[j]+theta_arr[j]) + self.width)
+                y3[j] = (y2 + self.link2*np.sin(theta_arr3[j] + theta_arr2[j]+theta_arr[j]) + self.h)
+
+        """
         for i in range(0,2):
             for j in range(0, len(theta_arr)):
-                x_arr[i,j] = self.width + self.link0*np.cos(theta_arr[j]) + self.link1*np.cos(theta_arr[j] + theta_rad[i]) + self.link2*np.cos(theta_arr[j] + theta_rad[i] + theta_rad[i])
-                y_arr[i,j] = self.link0*np.sin(theta_arr[j]) + self.link1*np.sin(theta_arr[j] + theta_rad[i]) + self.link2*np.sin(theta_arr[j] + theta_rad[i] + theta_rad[i])
+                x_arr[i,j] = self.width + self.link0*np.cos(theta_arr[j]) + self.link1*np.cos(theta_arr[j] + theta_rad2[i]) + self.link2*np.cos(theta_arr2[j] + theta_rad2[i] + theta_rad2[i])
+                y_arr[i,j] = self.link0*np.sin(theta_arr[j]) + self.link1*np.sin(theta_arr[j] + theta_rad2[i]) + self.link2*np.sin(theta_arr[j] + theta_rad[i] + theta_rad2[i]) + self.h
             for k in range(0, len(theta_arr)):
-                x_arr[i+2,k] = self.width + self.link0*np.cos(theta_rad[i]) + self.link1*np.cos(theta_arr[k] + theta_rad[i]) + self.link2*np.cos(theta_arr[k] + theta_rad[i] + theta_arr[k])
-                y_arr[i+2,k] = self.link0*np.sin(theta_rad[i]) + self.link1*np.sin(theta_arr[k] + theta_rad[i]) + self.link2*np.sin(theta_arr[k] + theta_rad[i] + theta_arr[k])
+                x_arr[i+2,k] = self.width + self.link0*np.cos(theta_rad[i]) + self.link1*np.cos(theta_arr2[k] + theta_rad[i]) + self.link2*np.cos(theta_arr2[k] + theta_rad[i] + theta_arr[k])
+                y_arr[i+2,k] = self.link0*np.sin(theta_rad[i]) + self.link1*np.sin(theta_arr2[k] + theta_rad[i]) + self.link2*np.sin(theta_arr2[k] + theta_rad[i] + theta_arr[k]) + self.h
         
-        return x_arr, y_arr         
+        #plt.plot(x3, y3, color='blue') 
+        
+        return x3, y3         
     
     
     def build_workspace_left(self, theta_arr, theta_rad):
@@ -80,11 +110,12 @@ class WorkSpace_Test:
         for i in range(0,2):
             for j in range(0, len(theta_arr)):
                 x_arr[i,j] = self.link0*np.cos(theta_arr[j]) - self.link1*np.cos(theta_arr[j]+ theta_rad[i]) + self.link2*np.cos(theta_arr[j]+ theta_rad[i] + theta_rad[i])
+                
                 y_arr[i,j] = self.link0*np.sin(theta_arr[j]) - self.link1*np.sin(theta_arr[j]+ theta_rad[i]) + self.link2*np.sin(theta_arr[j]+ theta_rad[i] + theta_rad[i])
             for k in range(0, len(theta_arr)):
                 x_arr[i+2,k] = self.link0*np.cos(theta_rad[i]) - self.link1*np.cos(theta_arr[k]+ theta_rad[i]) + self.link2*np.cos(theta_arr[k] + theta_rad[i] + theta_arr[k])
                 y_arr[i+2,k] = self.link0*np.sin(theta_rad[i]) - self.link1*np.sin(theta_arr[k]+ theta_rad[i]) + self.link2*np.sin(theta_arr[k] + theta_rad[i] + theta_arr[k]) 
-                
+        plt.plot(x_arr.T, y_arr.T, color='blue')         
         return x_arr, y_arr
        
              
@@ -102,12 +133,12 @@ class WorkSpace_Test:
             x_arr, y_arr = self.build_workspace_left(theta_arr, theta_rad)   
             #points = np.asarray([[x, y] for x in np.linspace(bottom_x, top_x, num_points) for y in np.linspace(bottom_y, top_y, num_points)])     #need to determine limits
             inside_indices = self.raycasting(x_arr, y_arr)
-            
+           
         return inside_indices, self.points
      
             
     def raycasting(self, x_arr, y_arr):
-        #plt.plot(x_arr.T, y_arr.T, color='blue')
+        
         inside_indices = []
         _eps = 0.00001
         _huge = np.inf
@@ -152,11 +183,12 @@ class WorkSpace_Test:
             if inside%2 != 0:
                 #self.inside_points.append(i)
                 inside_indices.append(idx)
-              
-            #else:
+                
+                
+            else:
                 #self.outside_points.append(i)
-                #plt.scatter(i[0],i[1], color='red')   
-                       
+                plt.scatter(i[0],i[1], color='red')   
+        print(inside_indices)           
         return inside_indices
         
         
@@ -174,49 +206,156 @@ class WorkSpace_Fitness:
     
         idx = [i for i in self.inside_indices_0 if i in self.inside_indices_1]
         fitness = len(idx)/(len(self.points0))
-        
-        #for p in idx:
-            #plt.scatter(self.points0[p][0], self.points0[p][1], color='green')           
-            #plt.scatter(self.points1[p][0], self.points1[p][1], color = 'yellow')  
+        print(idx)
+        for p in idx:
+            plt.scatter(self.points0[p][0], self.points0[p][1], color='green')           
+            plt.scatter(self.points1[p][0], self.points1[p][1], color = 'yellow')  
         #plt.show()    
         return fitness     
         
-        
-        
-#class Test_Plotting:
-#    def __init__(self):
+def coordinate_array(val):
+    finger_z = 0.2
     
-#    def get_points(    
-"""
+    
+    total_height = 0.2
+    coords0 = []
+    coords1 = []
+    bottom_x = -abs(total_height)
+    bottom_y = -0.2
+    row_length = finger_z - bottom_x
+    column_length = finger_z - bottom_y
+    row_points = 10
+    column_points = 10
+    n = 4
+    rad = 0.0195
+    
+    center_pt = [[x, y, 0] for x in np.linspace(bottom_x, finger_z, num=row_points) for y in np.linspace(bottom_y, finger_z, num=column_points)]
+    
+    x1 = [(c[0] + (np.cos(np.pi/n*x + np.pi/2)*rad)) for c in center_pt for x in range(0, n+1)]
+    
+   
+    y1 = [(c[1] + (np.sin(np.pi/n*x + np.pi/2)*rad)) for c in center_pt for x in range(0, n+1)]
+    z1 = np.linspace(0, 0, len(x1))
+    coords0 = np.asarray(list(zip(x1, y1, z1)))
+    x2 = [(c[0] + (np.cos(np.pi/n*x+np.pi + np.pi/2)*rad)) for c in center_pt for x in reversed(range(0, n+1))]
+    
+    y2 = [((c[1] - (np.sin(np.pi/n*x+np.pi + np.pi/2)*rad))) for c in center_pt for x in reversed(range(0, n+1))]
+    
+    z2 = np.linspace(0, 0, len(x2))
+    coords1 = np.asarray(list(zip(x2, y2, z2)))
+
+    return coords0, coords1     
+        
+def open_file(name):
+    
+    rt = f"../output/{name}/hand"
+    fittest_file = f"{rt}/{name}.urdf"
+    basic_load.load(fittest_file) 
+    
+    
+    
+def run_sim(x, y, max_link, loc, name):
+    pc = bc.BulletClient(connection_mode=p.GUI)    #or GUI for visual (slower)
+    pc.configureDebugVisualizer(pc.COV_ENABLE_RENDERING,0)
+    pc.setAdditionalSearchPath(pybullet_data.getDataPath())  # optionally
+    pc.setGravity(0, 0, 0)
+        
+    cubeStartPos = [0, 0, 1]
+    cubeStartOrientation = pc.getQuaternionFromEuler([0, 0, 0])
+
+    gripper = pc.loadURDF(f"{loc}/{name}.urdf", useFixedBase=1, flags=pc.URDF_USE_SELF_COLLISION_INCLUDE_PARENT) 
+        
+    pc.resetDebugVisualizerCamera(cameraDistance=.2, cameraYaw=180, cameraPitch=-91, cameraTargetPosition=[0, 0.1, 0.1])
+    for i in range(len(x)):
+            
+        p.addUserDebugPoints([[x[i], y[i], 0]], [[1, 0, 0]])
+    """
+    for i, o in enumerate(x):
+        
+        for k in range(len(o)):
+            
+            p.addUserDebugPoints([[x[i][k], y[i][k], 0]], [[1, 0, 0]])
+    """
+    pc.configureDebugVisualizer(pc.COV_ENABLE_RENDERING,1)        
+    #pc.changeDynamics(gripper, 0, jointLowerLimit=((math.pi)/4), jointUpperLimit=((5*math.pi)/4))
+    #pc.changeDynamics(gripper, 1, jointLowerLimit=((math.pi)/4), jointUpperLimit=((5*math.pi)/4))
+    pc.resetJointState(gripper, 0, targetValue=(-math.pi/4))   
+    pc.resetJointState(gripper, 1, targetValue=(-math.pi/4))   
+    pc.resetJointState(gripper, 2, targetValue=(-math.pi/4))  
+    pc.resetJointState(gripper, 3, targetValue=(math.pi))   
+    pc.resetJointState(gripper, 4, targetValue=(math.pi/2))   
+    pc.resetJointState(gripper, 5, targetValue=(math.pi/2))   
+    """
+    for i, o in enumerate(x):
+        
+        for k in range(len(o)):
+            idealJointPoses = p.calculateInverseKinematics(gripper, max_link, [x[i][k], y[i][k], 0], maxNumIterations=3000)   
+            for j in range(max_link+1):
+                #pc.setJointMotorControl2(gripper, j, controlMode=p.POSITION_CONTROL, targetPosition=idealJointPoses[j])
+                pc.resetJointState(gripper, j, targetValue=idealJointPoses[j])    
+                time.sleep(0.05)
+            #pc.resetJointState(gripper, 0, targetValue=((5*math.pi)/4))
+            #pc.resetJointState(gripper, 1, targetValue=(math.pi/2))
+    """
+    for i in range(len(x)):
+        idealJointPoses = p.calculateInverseKinematics(gripper, max_link, [x[i], y[i], 0], maxNumIterations=3000)   
+        for j in range(max_link+1):
+            pc.resetJointState(gripper, j, targetValue=idealJointPoses[j])    
+            time.sleep(0.05)
+        pc.stepSimulation()        
+            
+        time.sleep(1. / 240.)
+    
+    p.disconnect()    
+    
 if __name__ == "__main__":
-    
-    f0l1 = 0.05904
-    f0l2 = 0.0576
-    f0l3 = 0.02736
-    links0 = [f0l1, f0l2, f0l3]
+
+    coords0, coords1 = coordinate_array(0.03)
+    links0 = [0.06912, 0.0648, 0.01008]
+    #links0 = [f0l1, f0l2, f0l3]
     name0 = "finger_0"
 
-    f1l1 = 0.0576
-    f1l2 = 0.0864
+    f1l1 = 0.05#0.0576
+    f1l2 = 0.05#0.0864
     f1l3 = 0
-    links1 = [f1l1, f1l2, f1l3]
+    links1 = [0.01296, 0.06768, 0.06336]
+    #links1 = [f1l1, f1l2, f1l3]
     name1 = "finger_1"
 
-    width = 0.05326 
+    width = 0.05386/2
+    f = WorkSpace_Test(links0, width, name0, coords0)
+    theta1, theta2 = f.decide_angles(0)
+    theta_arr, theta_rad = f.make_angle_arrays(theta1, theta2)
+    theta1, theta2 = f.decide_angles(1)
+    theta_arr2, theta_rad2 = f.make_angle_arrays(theta1, theta2)
     
-    w = WorkSpace_Test(links0, width, name0)     
+    x, y = f.build_workspace_right(theta_arr, theta_arr2, theta_arr2)
+    l = Dict({'name': 'hand_mut_gen_2_f', 'finger_0': {'num_segs': 4}, 'finger_1': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [48, 45, 7], 'finger_1': [9, 47, 44]}, 'finger_0': 7, 'finger_1': 7}, 'length': {'palm': 0.05386, 'finger_0': 0.144, 'finger_1': 0.144}})
+    
+    #b = bh.Build_Json(l)
+    #b.build_hand()
+    #main.MainScript()
+    run_sim(x, y, 3, "../output/hand_mut_gen_2_f/hand", "hand_mut_gen_2_f")
+    #open_file("hand_mut_gen_2_f")
+    #plt.axis('equal')
+    #plt.show()
+    print("done")
+   
+    
+"""    
+     
+ f0l1 = 0.05904
+    f0l2 = 0.0576
+    f0l3 = 0.02736
+    
+    
+    w = WorkSpace_Test(links0, width, name0, coords0)     
     i0, p0 = w.main()
     
-    w2 = WorkSpace_Test(links1, 0, name1)
+    w2 = WorkSpace_Test(links1, 0, name1, coords1)
     i1, p1 = w2.main()
-    f = WorkSpace_Fitness(i0, i1, p0, p1).main()
-    print(f)
-    #plt.show()
-"""    
-    
-    
-     
-"""         
+    rad = 0.0195
+    f = WorkSpace_Fitness(i0, i1, p0, p1).main()   
 f0l1_theta_2 = 135
 f0l2_theta_1 = -45
 f0l2_theta_2 = 135
