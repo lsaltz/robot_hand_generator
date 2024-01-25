@@ -20,7 +20,6 @@ import sqlite3
 
 class Manage_Files:
    def __init__(self, ls):
->>>>>>> 4d392a68955fe91b84ccc1ae838cfd5cfc3d5db8
         self.ls = ls
         
         
