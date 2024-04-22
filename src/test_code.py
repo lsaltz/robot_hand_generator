@@ -14,6 +14,8 @@ import pybullet as p
 import time
 from scipy.spatial import ConvexHull
 import math
+from scipy.optimize import curve_fit
+from scipy import integrate
 """
 TODO:
 1. check limits with graphing
@@ -52,7 +54,7 @@ class WorkSpace_Test:
     def main(self, right_coords, left_coords):
     
         
-        val = 0.03
+        val = 0.01
         cent, r, l = self.coords(val)
         
         ri = self.build_coord_space_right()
@@ -67,13 +69,13 @@ class WorkSpace_Test:
         y_arr1 =  np.split(le, 2, 1)[1]
         
         
-        inside_indicies0 = self.raycasting(x_arr0, y_arr0, r)
+        inside_indicies0, o1 = self.raycasting(x_arr0, y_arr0, r)
         
-        inside_indicies1 = self.raycasting(x_arr1, y_arr1, l)
+        inside_indicies1, o2 = self.raycasting(x_arr1, y_arr1, l)
         
-        fitness, i0, i1 = self.fitness(inside_indicies0, inside_indicies1, r, l)
-        tc0, tc1 = self.run_sim(cent, right_coords, left_coords, i0, i1)
-        
+        fitness = self.fitness(inside_indicies0, inside_indicies1, r, l, cent, o1, o2)
+        #tc0, tc1 = self.run_sim(cent, right_coords, left_coords, i0, i1)
+        #self.get_area(ri, le)
         return fitness
      
     def build_coord_space_right(self):
@@ -162,22 +164,24 @@ class WorkSpace_Test:
         n = 8
         rad = 0.039
       
-        center_pt = [[x, y, 0] for x in np.linspace(bottom_x, finger_z, num=row_points) for y in np.linspace(bottom_y, finger_z, num=column_points)]
-    
-        x1 = [(c[0] + (np.cos(2*np.pi/n*x)*rad)) for c in center_pt for x in range(0, n+1)]
+        center_pt = [[x, y] for x in np.linspace(bottom_x, finger_z, num=row_points) for y in np.linspace(bottom_y, finger_z, num=column_points)]
+        x1 = [(c[0] + rad) for c in center_pt]
+        y1 = [c[1] for c in center_pt]
+        #x1 = [(c[0] + (np.cos(2*np.pi/n*x)*rad)) for c in center_pt for x in range(0, n+1)]
     
    
-        y1 = [(c[1] + (np.sin(2*np.pi/n*x)*rad)) for c in center_pt for x in range(0, n+1)]
+        #y1 = [(c[1] + (np.sin(2*np.pi/n*x)*rad)) for c in center_pt for x in range(0, n+1)]
         z1 = np.linspace(0, 0, len(x1))
         coords1 = list(zip(x1, y1))
-        x2 = [(c[0] + (np.cos(2*np.pi/n*x+np.pi)*rad)) for c in center_pt for x in range(0, n+1)]
-        y2 = [(c[1] - (np.sin(2*np.pi/n*x+np.pi)*rad)) for c in center_pt for x in range(0, n+1)]
-    
+        #x2 = [(c[0] + (np.cos(2*np.pi/n*x+np.pi)*rad)) for c in center_pt for x in range(0, n+1)]
+        #x2 = [(c[1] - (np.sin(2*np.pi/n*x+np.pi)*rad)) for c in center_pt for x in range(0, n+1)]
+        x2 = [(c[0] - rad) for c in center_pt]
+        y2 = [c[1] for c in center_pt]
         z2 = np.linspace(0, 0, len(x2))
         coords2 = list(zip(x2, y2))
-        c1 = np.reshape(np.asarray(coords1), (-1, n+1, 2)).tolist()
+        #c1 = np.reshape(np.asarray(coords1), (-1, n+1, 2)).tolist()
     
-        c2 = np.reshape(np.asarray(coords2), (-1, n+1, 2)).tolist()
+        #c2 = np.reshape(np.asarray(coords2), (-1, n+1, 2)).tolist()
     
         c = []
         r = []
@@ -185,14 +189,15 @@ class WorkSpace_Test:
         
         for i in center_pt:
             if i[0] < self.width/2 and i[0] > -abs(self.width)/2 and i[1] <0:
-                center_pt.remove(i)
+                #center_pt.remove(i)
+                continue
             else:
-                c.append(i)
+                #c.append(i)
                 plt.scatter(i[0], i[1], color="red")
         r = np.asarray(coords1)
         l = np.asarray(coords2)
         
-        return c, r, l
+        return center_pt, r, l
         
     def move_theta(self, mi, ma, nj, pc, gripper):
         test_coords = []
@@ -314,8 +319,10 @@ class WorkSpace_Test:
     def raycasting(self, x_arr, y_arr, points):
         
         inside_indices = []
+        outside_points = []
         _eps = 0.00001
         _huge = np.inf
+        inside = False
         for idx, i in enumerate(points):
             
             inside = 0
@@ -328,17 +335,17 @@ class WorkSpace_Test:
         
                 if A[1] > B[1]:
                     A, B = B, A
-                if i[1] == A[1]:
+                if i[1] == A[1] or i[1] == B[1]:
                     i[1] += _eps
-                if i[1] == B[1]:
-                    i[1] -= _eps
+                
                   
                 if i[1] > B[1] or i[1] < A[1] or i[0] > max(A[0], B[0]):    # The horizontal ray does not intersect with the edge
                     continue
 
                 if i[0] < min(A[0], B[0]):    # The ray intersects with the edge
-                    inside +=1
+                    inside = not inside
                     continue
+                
 
                 try:
                     m_edge = (B[1] - A[1]) / (B[0] - A[0])
@@ -351,48 +358,77 @@ class WorkSpace_Test:
                     m_point = _huge
 
                 if m_point >= m_edge:    # The ray intersects with the edge
-                    inside +=1
+                    inside = not inside
                     continue
 
-            if inside%2 != 0:
+            if inside:
                 #print(inside)
                 #self.inside_points.append(i)
                 inside_indices.append(idx)
-                
-                
-            #else:
-                #self.outside_points.append(i)
-                #plt.scatter(i[0],i[1], color='red')   
+                #plt.scatter(i[0],i[1], color='yellow')  
+            #source:http://www.philliplemons.com/posts/ray-casting-algorithm 
+            else:
+                outside_points.append(idx)
+                #plt.scatter(i[0],i[1], color='purple')   
                    
-        return inside_indices
+        return inside_indices, outside_points
         
     
-    def fitness(self, inside_indicies_0, inside_indicies_1, points0, points1):
+    def fitness(self, inside_indicies_0, inside_indicies_1, points0, points1, cent, o1, o2):
         
         idx = [i for i in inside_indicies_0 if i in inside_indicies_1]
+        #print(inside_indicies_0)
         #fitness = len(idx)/(len(points0))
         i0 = []
         i1=[]
         po = []
+        #print(o1)
+        #oss = [o for o in o1 if o in o2]
+        #for o in oss:
+            
+        #    plt.scatter(cent[o][0], cent[o][1], color='red')
         for p in idx:
             
-            if points0[p][0] < self.width/2 and points0[p][0] > -abs(self.width)/2 and points0[p][1] <0:
-                print("removed")
-                points0.pop(p)
+            if (points0[p][0] < self.width/2 and points0[p][0] > -abs(self.width)/2 and points0[p][1]) <0 and (points1[p][0] < self.width/2 and points1[p][0] > -abs(self.width)/2 and points1[p][1] <0):
+                continue
+                #cent.pop(p)
             else:
-                plt.scatter(points0[p][0], points0[p][1], color='green') 
-                i0.append(p)                
-            if points1[p][0] < self.width/2 and points1[p][0] > -abs(self.width)/2 and points1[p][1] <0:
-                print("removed")
-                points1.pop(p)
-            else:
+                #print("here")
+                plt.scatter(cent[p][0], cent[p][1], color='green') 
+                #i0.append(p)          
+            
                       
-                plt.scatter(points1[p][0], points1[p][1], color = 'yellow')
-                i1.append(p)
+                #plt.scatter(points1[p][0], points1[p][1], color = 'yellow')
+                #i1.append(p)
+        
         fitness = ((len(i0)+len(i1))/2)/((len(points0)+len(points1))/2)       
-        return fitness, points0, points1     
+        return fitness#, points0, points1     
     
-    
+    def get_area(self, r, l):
+        x = []
+        y = []
+        x2 = []
+        y2 = []
+        insidex = []
+        insidey = []
+        for i in r:
+            x.append(i[0])
+            y.append(i[1])
+        for i in l:
+            x2.append(i[0])
+            y2.append(i[1])
+        ind = self.raycasting(x, y, l)
+        ind2 = self.raycasting(x2, y2, r)
+        for i in ind:
+            insidex.append(l[i][0])
+            insidey.append(l[i][1])
+            #plt.scatter(l[i][0], l[i][1], color="purple")
+        for i in ind2:
+            insidex.append(r[i][0])
+            insidey.append(r[i][1])
+            #plt.scatter(r[i][0], r[i][1], color="purple")
+        ans = integrate.trapezoid(insidey, x=insidex, axis=0)
+        print(ans)
      
 if __name__ == "__main__":
     #[0.06912, 0.0648, 0.01008]

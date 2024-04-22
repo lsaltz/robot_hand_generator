@@ -6,7 +6,6 @@ import json
 import mutations
 from addict import Dict
 import matplotlib.pyplot as plt
-import test
 import time
 import main
 from pathlib import Path
@@ -17,6 +16,85 @@ import copy
 import test as nt
 import build_hand as bh
 
+
+
+
+
+class coordinate_generation:
+        
+    def angles_coordinates():
+        finger_z = 0.2
+        val = 0.01
+    
+        total_height = 0.2
+        
+        bottom_x = -abs(total_height)
+        bottom_y = -abs(total_height)
+        row_length = finger_z - bottom_x
+        column_length = finger_z - bottom_y
+        row_points = int(row_length/val)
+        column_points = int(column_length/val)
+        n = 8
+      
+        center_pt = [[x, y] for x in np.linspace(bottom_x, finger_z, num=row_points) for y in np.linspace(bottom_y, finger_z, num=column_points)]
+        
+        angles = np.linspace(0, 2*np.pi, n, endpoint=False)
+        
+        x1 = [(c[0] + (np.cos(a)*self.rad)) for c in center_pt for a in angles]
+    
+   
+        y1 = [(c[1] + (np.sin(a)*self.rad)) for c in center_pt for a in angles]
+        
+        coords1 = list(zip(x1, y1))
+        angles = [a+np.pi for a in angles]
+        x2 = [(c[0] + (np.cos(a)*self.rad)) for c in center_pt for a in angles]
+    
+   
+        y2 = [(c[1] + (np.sin(a)*self.rad))for c in center_pt for a in angles]
+        
+        coords2 = list(zip(x2, y2))
+        
+        c1 = np.reshape(np.asarray(coords1), (-1, n, 2))
+        c2 = np.reshape(np.asarray(coords2), (-1, n, 2))
+          
+        r = np.asarray(coords1)
+        l = np.asarray(coords2)
+        
+        return center_pt, c1, c2
+
+    def straight_coordinates():
+        finger_z = 0.2
+        val = 0.01
+    
+        total_height = 0.2
+        coords1 = []
+        coords2 = []
+        bottom_x = -abs(total_height)
+        bottom_y = -abs(total_height)
+        row_length = finger_z - bottom_x
+        column_length = finger_z - bottom_y
+        row_points = int(row_length/val)
+        column_points = int(column_length/val)
+        n = 8
+        rad = 0.039
+      
+        center_pt = [[x, y] for x in np.linspace(bottom_x, finger_z, num=row_points) for y in np.linspace(bottom_y, finger_z, num=column_points)]
+        x1 = [(c[0] + rad) for c in center_pt]
+        y1 = [c[1] for c in center_pt]
+        
+        
+        coords1 = list(zip(x1, y1))
+        
+        x2 = [(c[0] - rad) for c in center_pt]
+        y2 = [c[1] for c in center_pt]
+        
+        coords2 = list(zip(x2, y2))
+        
+        
+        r = np.asarray(coords1)
+        l = np.asarray(coords2)
+        
+        return center_pt, r, l
 """
 Calls combine to combine two files
 Parameters:
@@ -118,6 +196,8 @@ def test(dicList, num, coords0, coords1):
         tmpFitness.append([f, f"{gripper_name}.json"])
         
     return tmpFitness
+    
+ 
     
     
     
@@ -235,7 +315,8 @@ if __name__ == "__main__":
     print("Please input the integer number of generations you would like to run this for: ")
     gen = int(input())+1  #generations ea runs for
     val = 0.03
-    coords0, coords1 = coordinate_array(val)
+    cent_a, r_a, l_a = coordinate_generation.angles_coordinates()
+    cent_s, r_s, l_s = coordinate_generation.straight_coordinates()
     
     ls = []    #total list of grippers
     cycle_fitness = []

@@ -61,7 +61,8 @@ class WorkSpace_Test:
         inside_0 = []
         count1 = []
         inside_1 = []
-        
+        angles0 = []
+        angles1 = []
         val = 0.01
         cent, r, l = self.coords(val)
         
@@ -77,19 +78,25 @@ class WorkSpace_Test:
         y_arr1 =  np.split(le, 2, 1)[1]
         
         for i, ele in enumerate(r):
-            count = self.raycasting(x_arr0, y_arr0, ele)
+            
+            angles = self.raycasting(x_arr0, y_arr0, ele)
+            angles0.append(angles)
+            count = len(angles)
             
             if count != 0:
                 inside_0.append(i)
                 count0.append(count)
+                
         for i, ele in enumerate(l):
-            count = self.raycasting(x_arr1, y_arr1, ele)
-            
+            angles = self.raycasting(x_arr1, y_arr1, ele)
+            count = len(angles)
+            angles1.append(angles)
+        #CHECK THEM BOTH TOGETHER!!! Right now it is going through all the angles separately.  
             if count != 0:
                 inside_1.append(i)
                 count1.append(count)
-        
-        fitness = self.fitness(inside_0, inside_1, r, l, cent, count0, count1)
+                
+        fitness = self.fitness(inside_0, inside_1, r, l, cent, count0, count1, angles0, angles1)
         #tc0, tc1 = self.run_sim(cent, right_coords, left_coords, i0, i1)
         #self.get_area(ri, le)
         return fitness
@@ -178,27 +185,32 @@ class WorkSpace_Test:
         row_points = int(row_length/val)
         column_points = int(column_length/val)
         n = 8
-        rad = 0.039
+        rad = 0.039/2
       
         center_pt = [[x, y] for x in np.linspace(bottom_x, finger_z, num=row_points) for y in np.linspace(bottom_y, finger_z, num=column_points)]
         #x1 = [(c[0] + rad) for c in center_pt]
         #y1 = [c[1] for c in center_pt]
-        x1 = [(c[0] + (np.cos(2*np.pi/n*x)*rad)) for c in center_pt for x in range(0, n+1)]
+        angles = np.linspace(0, 2*np.pi, n, endpoint=False)
+        x1 = [(c[0] + (np.cos(a)*rad)) for c in center_pt for a in angles]
     
    
-        y1 = [(c[1] + (np.sin(2*np.pi/n*x)*rad)) for c in center_pt for x in range(0, n+1)]
+        y1 = [(c[1] + (np.sin(a)*rad)) for c in center_pt for a in angles]
         z1 = np.linspace(0, 0, len(x1))
         coords1 = list(zip(x1, y1))
-        x2 = [(c[0] + (np.cos(2*np.pi/n*x+np.pi)*rad)) for c in center_pt for x in range(0, n+1)]
-        y2 = [(c[1] - (np.sin(2*np.pi/n*x+np.pi)*rad)) for c in center_pt for x in range(0, n+1)]
+        angles = [a+np.pi for a in angles]
+        x2 = [(c[0] + (np.cos(a)*rad)) for c in center_pt for a in angles]
+    
+   
+        y2 = [(c[1] + (np.sin(a)*rad))for c in center_pt for a in angles]
         #x2 = [(c[0] - rad) for c in center_pt]
         #y2 = [c[1] for c in center_pt]
         z2 = np.linspace(0, 0, len(x2))
         coords2 = list(zip(x2, y2))
-        c1 = np.reshape(np.asarray(coords1), (-1, n+1, 2))
+        c1 = np.reshape(np.asarray(coords1), (-1, n, 2))
         
-        c2 = np.reshape(np.asarray(coords2), (-1, n+1, 2))
-    
+        
+        c2 = np.reshape(np.asarray(coords2), (-1, n, 2))
+        
         c = []
         r = []
         l = []
@@ -210,6 +222,8 @@ class WorkSpace_Test:
             else:
                 #c.append(i)
                 plt.scatter(i[0], i[1], color="red")
+        #plt.scatter(x1, y1, color="blue")
+        #plt.scatter(x2, y2, color="purple")
         r = np.asarray(coords1)
         l = np.asarray(coords2)
         
@@ -340,6 +354,7 @@ class WorkSpace_Test:
         _huge = np.inf
         inside = False
         count = 0
+        angles = []
         for idx, i in enumerate(points):
             
             inside = 0
@@ -381,36 +396,49 @@ class WorkSpace_Test:
             if inside:
                 #print(inside)
                 #self.inside_points.append(i)
-                count +=1
+                
+                angles.append(idx)
                 #plt.scatter(i[0],i[1], color='yellow')  
             #source:http://www.philliplemons.com/posts/ray-casting-algorithm 
-            else:
-                outside_points.append(idx)
-                #plt.scatter(i[0],i[1], color='purple')   
-                   
-        return count
+            
+                  
+        return angles
         
     
-    def fitness(self, inside_indicies_0, inside_indicies_1, points0, points1, cent, count0, count1):
+    def fitness(self, inside_indicies_0, inside_indicies_1, points0, points1, cent, count0, count1, angles0, angles1):
         
-        #idx = [i for i in inside_indicies_0 if i in inside_indicies_1]
-        ind = list(zip(inside_indicies_0, count0))
-        idx = [i for i in ind if i[0] in inside_indicies_1]
+        
+        ct = []
+        idx = []
+        
+        for i in range(len(inside_indicies_0)):
+            count = 0
+            if inside_indicies_0[i] in inside_indicies_1:
+                for a in angles0[inside_indicies_0[i]]:
+                    if a in angles1[inside_indicies_0[i]]:
+                         count = count + 1
+                if count != 0:
+                    
+                    idx.append([inside_indicies_0[i], count])
+                    ct.append(count)
+        
+        
+        
         c = []
         for i in idx:
             j = i[0]
             c.append(cent[j])
-        #print(inside_indicies_0)
-        #fitness = len(idx)/(len(points0))
+        
+        fitness = sum(ct)/(len(cent)*8)
         centersx = np.split(np.asarray(c), 2, 1)[0]
-        print(centersx)
+        
         centersy = np.split(np.asarray(c), 2, 1)[1]
         cnt = np.split(np.asarray(idx), 2, 1)[1]
         plt.scatter(centersx, centersy, c=cnt, ec='k')
         plt.colorbar()
             
         
-        fitness = 0     
+           
         return fitness#, points0, points1     
     
     def get_area(self, r, l):

@@ -1,449 +1,366 @@
 import numpy as np
+import cv2
 import matplotlib.pyplot as plt
-
-f0l1 = 0.05904
-f0l2 = 0.0576
-f0l3 = 0.02736
-
-f1l1 = 0.0576
-f1l2 = 0.0864
-f1l3 = 0
-
-N = 1000
-
-f0l1_theta_1 = -45
-f0l1_theta_2 = 135
-f0l2_theta_1 = -45
-f0l2_theta_2 = 135
-f0l3_theta_1 = -45
-f0l3_theta_2  = 135
-
-f1l1_theta_1 = 45
-f1l1_theta_2 = 225
-f1l2_theta_1 = 45
-f1l2_theta_2 = 225
-f1l3_theta_1 = 45
-f1l3_theta_2 = 225
-
-width = 0.05326
-
-f0_theta1 = [f0l1_theta_1, f0l1_theta_2]
-f0_theta1 = [i * np.pi/180 for i in f0_theta1]
-
-f0_theta2 = [f0l2_theta_1, f0l2_theta_2]
-f0_theta2 = [i * np.pi/180 for i in f0_theta2]
-
-f0_theta3 = [f0l3_theta_1, f0l3_theta_2]
-f0_theta3 = [i * np.pi/180 for i in f0_theta3]
-
-f1_theta1 = [f1l1_theta_1, f1l1_theta_2]
-f1_theta1 = [i * np.pi/180 for i in f1_theta1]
-
-f1_theta2 = [f1l2_theta_1, f1l2_theta_2]
-f1_theta2 = [i * np.pi/180 for i in f1_theta2]
-
-f1_theta3 = [f1l3_theta_1, f1l3_theta_2]
-f1_theta3 = [i * np.pi/180 for i in f1_theta3]
-
-f0theta_1 = np.linspace(f0l1_theta_1,f0l1_theta_2, N)
-f0theta_1 = f0theta_1 * np.pi/180
-f0theta_2 = np.linspace(f0l2_theta_1, f0l2_theta_2, N)
-f0theta_2 = f0theta_2 * np.pi/180
-f0theta_3 = np.linspace(f0l3_theta_1, f0l3_theta_1, N)
-f0theta_3 = f0theta_3 * np.pi/180
-
-f1theta_1 = np.linspace(f1l1_theta_1,f1l1_theta_2, N)
-f1theta_1 = f1theta_1 * np.pi/180
-f1theta_2 = np.linspace(f1l2_theta_1, f1l2_theta_2, N)
-f1theta_2 = f1theta_2 * np.pi/180
-f1theta_3 = np.linspace(f1l3_theta_1, f1l3_theta_1, N)
-f1theta_3 = f1theta_3 * np.pi/180
-
-x0 = np.zeros((2*len(f0theta_1), len(f0theta_2)))
-y0 = np.zeros((2*len(f0theta_1), len(f0theta_2)))
-
-x1 = np.zeros((2*len(f0theta_1), len(f0theta_2)))
-y1 = np.zeros((2*len(f0theta_1), len(f0theta_2)))
-for i in range(0,2):
-    for j in range(0, len(f0theta_1)):
-        x0[i,j] = width + f0l1*np.cos(f0theta_1[j]) + f0l2*np.cos(f0theta_1[j]+ f0_theta2[i]) + f0l3*np.cos(f0theta_1[j]+ f0_theta1[i] + f0_theta1[i])
-        y0[i, j] = f0l1*np.sin(f0theta_1[j]) + f0l2*np.sin(f0theta_1[j]+ f0_theta2[i]) + f0l3*np.sin(f0theta_1[j]+ f0_theta1[i] + f0_theta1[i])
-    for k in range(0, len(f0theta_1)):
-        x0[i+2,k] = width + f0l1*np.cos(f0_theta1[i]) + f0l2*np.cos(f0theta_2[k]+ f0_theta1[i]) + f0l3*np.cos(f0theta_1[k]+ f0_theta1[i] + f0theta_1[k])
-        y0[i+2, k] = f0l1*np.sin(f0_theta1[i]) + f0l2*np.sin(f0theta_2[k]+ f0_theta1[i]) + f0l3*np.sin(f0theta_1[k]+ f0_theta1[i] + f0theta_1[k])
-    for l in range(0, len(f0theta_1)):
-        x1[i,l] = f1l1*np.cos(f1theta_1[l]) - f1l2*np.cos(f1theta_1[l]+ f1_theta2[i]) + f1l3*np.cos(f1theta_1[l]+ f1_theta1[i] + f1_theta1[i])
-        y1[i, l] = f1l1*np.sin(f1theta_1[l]) - f1l2*np.sin(f1theta_1[l]+ f1_theta2[i]) + f1l3*np.sin(f1theta_1[l]+ f1_theta1[i] + f1_theta1[i])
-    for m in range(0, len(f0theta_1)):
-        x1[i+2,m] = f1l1*np.cos(f1_theta1[i]) - f1l2*np.cos(f1theta_2[m]+ f1_theta1[i]) + f1l3*np.cos(f1theta_1[m]+ f1_theta1[i] + f1theta_1[m])
-        y1[i+2, m] = f1l1*np.sin(f1_theta1[i]) - f1l2*np.sin(f1theta_2[m]+ f1_theta1[i]) + f1l3*np.sin(f1theta_1[m]+ f1_theta1[i] + f1theta_1[m])
-        
-x0 = np.array(x0)
-y0 = np.array(y0)
-
-x1 = np.array(x1)
-y1 = np.array(y1)
-
-plt.plot(x0.T, y0.T, color='blue')
-plt.plot(x1.T, y1.T, color='red')
-plt.show()
+from matplotlib import path
+from matplotlib.lines import Line2D
+import main
+import build_hand as bh
+import basic_load
+from addict import Dict
+import time
+import math
+from scipy.optimize import curve_fit
+from scipy import integrate
+from matplotlib.colors import BoundaryNorm
+from matplotlib.ticker import MaxNLocator
+from addict import Dict
 
 
 class WorkSpace_Test:
 
-    def __init__(self, links, width, finger_name, points):
-        self.link0 = links[0]
-        self.link1 = links[1]
-        self.link2 = links[2]
-        self.finger_name = finger_name
-        self.width = width
-        self.points = points
-        self.N = 100
-        self.cube = 0.039
-        self.inside_points = []
-        self.outside_points = []
+    def __init__(self, loc, name, hand_data):
+
+        self.name = name
+        self.rad = 0.039/2
+        self.hand_data = hand_data
+        self.width = 0
+        self.fitness_data = Dict()
         
+    def main(self, c_a, r_a, l_a, c_s, r_s, l_s):
+        seg_lengths0, seg_lengths1 = self.get_data()
+        right_coords = self.build_coord_space_right(seg_lengths0)
+        left_coords = self.build_coord_space_left(seg_lengths1)
+        self.fitness_data.name = self.name
+        self.fitness_data.coord_space_right = right_coords
+        self.fitness_data.coord_space_left = left_coords
+        area_ans = self.area_test(right_coords, left_coords, c_a, r_a, l_a)
+        angles_ans = self.angles_test(right_coords, left_coords, c_s, r_s, l_s)
+        straight_ans = self.straight_test(right_coords, left_coords)
         
+        return area_ans, angles_ans, straight_ans
         
-    def decide_angles(self):
-    
-        if self.finger_name == "finger_0":
-            theta1 = -45
-            theta2 = 135
-        else:
-            theta1 = 45
-            theta2 = 225
+    def save_data(self):
+        with open(f"../output/{self.name}", mode="w") as dataFile:
             
-        return theta1, theta2
-        
     
-    def make_angle_arrays(self, theta1, theta2):
+    def get_data(self):
+        segs0 = self.hand_data.finger_0.num_segs
+        segs1 = self.hand_data.finger_1.num_segs
         
-        theta_rad = [theta1, theta2]
-        theta_rad = [i * np.pi/180 for i in theta_rad]
-        theta_arr = np.linspace(theta1,theta2, self.N)
-        theta_arr = theta_arr * np.pi/180
         
-        return theta_arr, theta_rad 
+        self.width = self.hand_data.length.palm
         
+        finger_0_length = self.hand_data.length.finger_0
+        finger_1_length = self.hand_data.length.finger_1
+
+        
+           
+        
+        list_ratios0 = self.hand_data.ratio.segs.finger_0
+        list_ratios1 = self.hand_data.ratio.segs.finger_1
+        
+        seg_lengths0 = [x * finger_0_length for x in list_ratios0]
+        seg_lengths1 = [x * finger_1_length for x in list_ratios1]
+        
+        if len(seg_lengths0) == 2:
+            seg_lengths0.append(0)
+        if len(seg_lengths1) == 2:
+            seg_lengths1.append(0)
+            
+        return seg_lengths0, seg_lengths1
     
-    def build_workspace_right(self, theta_arr, theta_rad):
-    
-        x_arr = np.zeros((2*len(theta_arr), len(theta_arr)))
-        y_arr = np.zeros((2*len(theta_arr), len(theta_arr)))
+    def build_coord_space_right(self, seg_lengths0):
         
-        for i in range(0,2):
-            for j in range(0, len(theta_arr)):
-                x_arr[i,j] = self.width + self.link0*np.cos(theta_arr[j]) + self.link1*np.cos(theta_arr[j] + theta_rad[i]) + self.link2*np.cos(theta_arr[j] + theta_rad[i] + theta_rad[i])
-                y_arr[i,j] = self.link0*np.sin(theta_arr[j]) + self.link1*np.sin(theta_arr[j] + theta_rad[i]) + self.link2*np.sin(theta_arr[j] + theta_rad[i] + theta_rad[i])
-            for k in range(0, len(theta_arr)):
-                x_arr[i+2,k] = self.width + self.link0*np.cos(theta_rad[i]) + self.link1*np.cos(theta_arr[k] + theta_rad[i]) + self.link2*np.cos(theta_arr[k] + theta_rad[i] + theta_arr[k])
-                y_arr[i+2,k] = self.link0*np.sin(theta_rad[i]) + self.link1*np.sin(theta_arr[k] + theta_rad[i]) + self.link2*np.sin(theta_arr[k] + theta_rad[i] + theta_arr[k])
+        right_coords = []
         
-        return x_arr, y_arr         
-    
-    
-    def build_workspace_left(self, theta_arr, theta_rad):
-        x_arr = np.zeros((2*len(theta_arr), len(theta_arr)))
-        y_arr = np.zeros((2*len(theta_arr), len(theta_arr)))
+        for i in range(-135, -135+180):
+            right_coords.append(self.mathy_thing(i, 0, 0, seg_lengths0[0], seg_lengths0[1], seg_lengths0[2]))
+        for i in range(0, 90):
+            right_coords.append(self.mathy_thing(-135+180, i, 0, seg_lengths0[0], seg_lengths0[1], seg_lengths0[2]))
+        for i in range(0, 90):
+            right_coords.append(self.mathy_thing(-135+180, 90, i, seg_lengths0[0], seg_lengths0[1], seg_lengths0[2]))
+        for i in reversed(range(-135, -135+180)):
+            right_coords.append(self.mathy_thing(i, 90, 90, seg_lengths0[0], seg_lengths0[1], seg_lengths0[2]))
+        for i in reversed(range(0, 90)):
+            right_coords.append(self.mathy_thing(-135, i, 90, seg_lengths0[0], seg_lengths0[1], seg_lengths0[2]))
+        for i in reversed(range(0, 90)):
+            right_coords.append(self.mathy_thing(-135, 0, i, seg_lengths0[0], seg_lengths0[1], seg_lengths0[2]))
         
-        for i in range(0,2):
-            for j in range(0, len(theta_arr)):
-                x_arr[i,j] = self.link0*np.cos(theta_arr[j]) - self.link1*np.cos(theta_arr[j]+ theta_rad[i]) + self.link2*np.cos(theta_arr[j]+ theta_rad[i] + theta_rad[i])
-                y_arr[i,j] = self.link0*np.sin(theta_arr[j]) - self.link1*np.sin(theta_arr[j]+ theta_rad[i]) + self.link2*np.sin(theta_arr[j]+ theta_rad[i] + theta_rad[i])
-            for k in range(0, len(theta_arr)):
-                x_arr[i+2,k] = self.link0*np.cos(theta_rad[i]) - self.link1*np.cos(theta_arr[k]+ theta_rad[i]) + self.link2*np.cos(theta_arr[k] + theta_rad[i] + theta_arr[k])
-                y_arr[i+2,k] = self.link0*np.sin(theta_rad[i]) - self.link1*np.sin(theta_arr[k]+ theta_rad[i]) + self.link2*np.sin(theta_arr[k] + theta_rad[i] + theta_arr[k]) 
+        
+        return np.asarray(right_coords)
+        
+    def build_coord_space_left(self, seg_lengths1):
+        left_coords = []
+        
+        for i in reversed(range(135-180, 135, seg_lengths1[0], seg_lengths1[1], seg_lengths1[2])):
+            left_coords.append(self.mathy_thing1(i, 0, 0, seg_lengths1[0], seg_lengths1[1], seg_lengths1[2]))
+        for i in reversed(range(-90, 0)):
+            left_coords.append(self.mathy_thing1(135-180, i, 0, seg_lengths1[0], seg_lengths1[1], seg_lengths1[2]))
+        for i in reversed(range(-90, 0)):
+            left_coords.append(self.mathy_thing1(135-180, -90, i, seg_lengths1[0], seg_lengths1[1], seg_lengths1[2]))
+        for i in range(135-180, 135):
+            left_coords.append(self.mathy_thing1(i, -90, -90, seg_lengths1[0], seg_lengths1[1], seg_lengths1[2]))
+        for i in range(-90, 0):
+            left_coords.append(self.mathy_thing1(135, i, -90, seg_lengths1[0], seg_lengths1[1], seg_lengths1[2]))
+        for i in range(-90, 0):
+            left_coords.append(self.mathy_thing1(135, 0, i, seg_lengths1[0], seg_lengths1[1], seg_lengths1[2]))
+        
+        return np.asarray(left_coords)    
+        
+        
+    def mathy_thing(self, theta1, theta2, theta, seg_lengths0, seg_lengths0, seg_lengths0):
+        theta1 = np.pi * theta1 / 180
+        theta2 = np.pi * theta2 / 180
+        theta3 = np.pi * theta3 / 180
+        val = 90 * np.pi/180
+        
+        
+        x = self.l1 *np.cos(theta1 + val) + self.l2*np.cos(theta1+theta2 + val) + self.l3*np.cos(theta1 + theta2 + theta3 + val) + self.width/2
+        y = self.l1 * np.sin(theta1 + val) + self.l2*np.sin(theta1 + theta2 + val) + self.l3*np.sin(theta1 + theta2 + theta3 + val)
+        
+        
+        return [x, y]
+        
+    def mathy_thing1(self, theta1, theta2, theta3, seg_lengths1, seg_lengths1, seg_lengths1):
+        theta1 = np.pi * theta1 / 180
+        theta2 = np.pi * theta2 / 180
+        theta3 = np.pi * theta3 / 180
+        val = 90 * np.pi/180
+        
+        
+        x = self.l4 *np.cos(theta1 + val) + self.l5*np.cos(theta1+theta2 + val) + self.l6*np.cos(theta1 + theta2 + theta3 + val) - self.width/2
+        y = self.l4 * np.sin(theta1 + val) + self.l5*np.sin(theta1 + theta2 + val) + self.l6*np.sin(theta1 + theta2 + theta3 + val)
+        
+        
+        return [x, y]
+        
+
+    
+
+    def area_test(self, r, l):
+        x = []
+        y = []
+        x2 = []
+        y2 = []
+        insidex = []
+        insidey = []
+        for i in r:
+            x.append(i[0])
+            y.append(i[1])
+        for i in l:
+            x2.append(i[0])
+            y2.append(i[1])
+        ind = self.raycasting(x, y, l)
+        ind2 = self.raycasting(x2, y2, r)
+        for i in ind:
+            insidex.append(l[i][0])
+            insidey.append(l[i][1])
+            
+        for i in ind2:
+            insidex.append(r[i][0])
+            insidey.append(r[i][1])
+            
+        ans = integrate.trapezoid(insidey, x=insidex, axis=0)
+        self.fitness_data.area_outline = [insidex, insidey]
+        self.fitness_data.update()
+        return ans
+        
+    def angles_test(self, ri, le, cent, r, l):
+        
+        x_arr0 = np.split(ri, 2, 1)[0]
+        
+        y_arr0 =  np.split(ri, 2, 1)[1]
+        
+        x_arr1 = np.split(le, 2, 1)[0]
+        y_arr1 =  np.split(le, 2, 1)[1]
+        
+        for i, ele in enumerate(r):
+            
+            angles = self.angles_raycasting(x_arr0, y_arr0, ele)
+            angles0.append(angles)
+            count = len(angles)
+            
+            if count != 0:
+                inside_0.append(i)
+                count0.append(count)
                 
-        return x_arr, y_arr
-       
-             
-    def main(self):
-    
-        theta1, theta2 = self.decide_angles()
-        theta_arr, theta_rad = self.make_angle_arrays(theta1, theta2)
-        val = 0.03
+        for i, ele in enumerate(l):
+            angles = self.angles_raycasting(x_arr1, y_arr1, ele)
+            count = len(angles)
+            angles1.append(angles)
+         
+            if count != 0:
+                inside_1.append(i)
+                count1.append(count)
+                
         
-        if self.finger_name == "finger_0":
-            x_arr, y_arr = self.build_workspace_right(theta_arr, theta_rad)
-            #points = np.asarray([[x+self.cube, y] for x in np.linspace(bottom_x, top_x, num_points) for y in np.linspace(bottom_y, top_y, num_points)])   
-            inside_indices = self.raycasting(x_arr, y_arr)
-        else:
-            x_arr, y_arr = self.build_workspace_left(theta_arr, theta_rad)   
-            #points = np.asarray([[x, y] for x in np.linspace(bottom_x, top_x, num_points) for y in np.linspace(bottom_y, top_y, num_points)])     #need to determine limits
-            inside_indices = self.raycasting(x_arr, y_arr)
-            
-        return inside_indices, self.points
-     
-            
-    def raycasting(self, x_arr, y_arr):
-        #plt.plot(x_arr.T, y_arr.T, color='blue')
+        
+        
+        ct = []
+        idx = []
+        
+        for i in range(len(inside_indicies_0)):
+            count = 0
+            if inside_indicies_0[i] in inside_indicies_1:
+                for a in angles0[inside_indicies_0[i]]:
+                    if a in angles1[inside_indicies_0[i]]:
+                         count = count + 1
+                if count != 0:
+                    
+                    idx.append([inside_indicies_0[i], count])
+                    ct.append(count)
+        
+        
+        
+        c = []
+        for i in idx:
+            j = i[0]
+            c.append(cent[j])
+        
+        fitness = sum(ct)/(len(cent)*8)
+        centersx = np.split(np.asarray(c), 2, 1)[0]
+        
+        centersy = np.split(np.asarray(c), 2, 1)[1]
+        cnt = np.split(np.asarray(idx), 2, 1)[1]
+        self.fitness_data.angle_data.centersx = centersx
+        self.fitness_data.angle_data.centersy = centersy
+        self.fitness_data.angle_data.count = cnt
+        self.fitness_data.update()
+        
+        return fitness
+    
+    def angles_raycasting(self, x_arr, y_arr, points):
+        
         inside_indices = []
+        outside_points = []
         _eps = 0.00001
         _huge = np.inf
-        for idx, i in enumerate(self.points):
+        inside = False
+        count = 0
+        angles = []
+        for idx, i in enumerate(points):
             
             inside = 0
-            for k,j in enumerate(x_arr):
+            for j in range(len(x_arr)-1):
         
-                for edge in range(len(j)-1):
+                
+                    
+                A = [x_arr[j], y_arr[j]]
+                B = [x_arr[j+1], y_arr[j+1]]
         
-                    A = [x_arr[k][edge], y_arr[k][edge]]
-                    B = [x_arr[k][edge+1], y_arr[k][edge+1]]
+                if A[1] > B[1]:
+                    A, B = B, A
+                if i[1] == A[1] or i[1] == B[1]:
+                    i[1] += _eps
+                
+                  
+                if i[1] > B[1] or i[1] < A[1] or i[0] > max(A[0], B[0]):
+                    continue
+
+                if i[0] < min(A[0], B[0]):
+                    inside = not inside
+                    continue
+                
+
+                try:
+                    m_edge = (B[1] - A[1]) / (B[0] - A[0])
+                except ZeroDivisionError:
+                    m_edge = _huge
+
+                try:
+                    m_point = (i[1] - A[1]) / (i[0] - A[0])
+                except ZeroDivisionError:
+                    m_point = _huge
+
+                if m_point >= m_edge:    
+                    inside = not inside
+                    continue
+
+            if inside:
+               
+                
+                angles.append(idx)
+
+                  
+        return angles
         
-                    if A[1] > B[1]:
-                        A, B = B, A
-                    if i[1] == A[1]:
-                        i[1] += _eps
-                    if i[1] == B[1]:
-                        i[1] -= _eps
-                        
-                    if i[1] > B[1] or i[1] < A[1] or i[0] > max(A[0], B[0]):    # The horizontal ray does not intersect with the edge
-                        continue
 
-                    if i[0] < min(A[0], B[0]):    # The ray intersects with the edge
-                        inside +=1
-                        continue
+    def straight_test(self, ri, le, cent, r, l): 
+        
+        
+        
+        
+        
+        x_arr0 = np.split(ri, 2, 1)[0]
+        
+        y_arr0 =  np.split(ri, 2, 1)[1]
+        
+        x_arr1 = np.split(le, 2, 1)[0]
+        y_arr1 =  np.split(le, 2, 1)[1]
+        
+        
+        inside_indicies0 = self.straight_raycasting(x_arr0, y_arr0, r)
+        
+        inside_indicies1 = self.straight_raycasting(x_arr1, y_arr1, l)
+        
+        idx = [i for i in inside_indicies_0 if i in inside_indicies_1]
+        fitness = len(idx)/len(cent)       
+        return fitness
+    
+    def straight_raycasting(self, x_arr, y_arr, points):
+        
+        inside_indices = []
+        
+        _eps = 0.00001
+        _huge = np.inf
+        inside = False
+        for idx, i in enumerate(points):
+            
+            inside = 0
+            for j in range(len(x_arr)-1):
+        
+                
+                    
+                A = [x_arr[j], y_arr[j]]
+                B = [x_arr[j+1], y_arr[j+1]]
+        
+                if A[1] > B[1]:
+                    A, B = B, A
+                if i[1] == A[1] or i[1] == B[1]:
+                    i[1] += _eps
+                
+                  
+                if i[1] > B[1] or i[1] < A[1] or i[0] > max(A[0], B[0]):
+                    continue
 
-                    try:
-                        m_edge = (B[1] - A[1]) / (B[0] - A[0])
-                    except ZeroDivisionError:
-                        m_edge = _huge
+                if i[0] < min(A[0], B[0]):
+                    inside = not inside
+                    continue
+                
 
-                    try:
-                        m_point = (i[1] - A[1]) / (i[0] - A[0])
-                    except ZeroDivisionError:
-                        m_point = _huge
+                try:
+                    m_edge = (B[1] - A[1]) / (B[0] - A[0])
+                except ZeroDivisionError:
+                    m_edge = _huge
 
-                    if m_point >= m_edge:    # The ray intersects with the edge
-                        inside +=1
-                        continue
+                try:
+                    m_point = (i[1] - A[1]) / (i[0] - A[0])
+                except ZeroDivisionError:
+                    m_point = _huge
 
-            if inside%2 != 0:
-                #self.inside_points.append(i)
+                if m_point >= m_edge:    # The ray intersects with the edge
+                    inside = not inside
+                    continue
+
+            if inside:
+                
                 inside_indices.append(idx)
-              
-            #else:
-                #self.outside_points.append(i)
-                #plt.scatter(i[0],i[1], color='red')   
-                       
+                
+            
         return inside_indices
         
         
-     
-            
-class WorkSpace_Fitness:
-
-    def __init__(self, inside_indices_0, inside_indices_1, points0, points1):
-        self.inside_indices_0 = inside_indices_0
-        self.inside_indices_1 = inside_indices_1
-        self.points0 = np.asarray(points0)
-        self.points1 = np.asarray(points1)
-    
-    def main(self):
-    
-        idx = [i for i in self.inside_indices_0 if i in self.inside_indices_1]
-        fitness = len(idx)/(len(self.points0))
-        
-        #for p in idx:
-            #plt.scatter(self.points0[p][0], self.points0[p][1], color='green')           
-            #plt.scatter(self.points1[p][0], self.points1[p][1], color = 'yellow')  
-        #plt.show()    
-        return fitness     
         
         
         
-#class Test_Plotting:
-#    def __init__(self):
-    
-#    def get_points(    
-"""
-if __name__ == "__main__":
-    
-    f0l1 = 0.05904
-    f0l2 = 0.0576
-    f0l3 = 0.02736
-    links0 = [f0l1, f0l2, f0l3]
-    name0 = "finger_0"
-
-    f1l1 = 0.0576
-    f1l2 = 0.0864
-    f1l3 = 0
-    links1 = [f1l1, f1l2, f1l3]
-    name1 = "finger_1"
-
-    width = 0.05326 
-    
-    w = WorkSpace_Test(links0, width, name0)     
-    i0, p0 = w.main()
-    
-    w2 = WorkSpace_Test(links1, 0, name1)
-    i1, p1 = w2.main()
-    f = WorkSpace_Fitness(i0, i1, p0, p1).main()
-    print(f)
-    #plt.show()
-"""    
-    
-    
-     
-"""         
-f0l1_theta_2 = 135
-f0l2_theta_1 = -45
-f0l2_theta_2 = 135
-f0l3_theta_1 = -45
-f0l3_theta_2  = 135
-
-f1l1_theta_1 = 45
-f1l1_theta_2 = 225
-f1l2_theta_1 = 45
-f1l2_theta_2 = 225
-f1l3_theta_1 = 45
-f1l3_theta_2 = 225
-
-
-
-f0_theta1 = [f0l1_theta_1, f0l1_theta_2]
-f0_theta1 = [i * np.pi/180 for i in f0_theta1]
-
-f0_theta2 = [f0l2_theta_1, f0l2_theta_2]
-f0_theta2 = [i * np.pi/180 for i in f0_theta2]
-
-f0_theta3 = [f0l3_theta_1, f0l3_theta_2]
-f0_theta3 = [i * np.pi/180 for i in f0_theta3]
-
-f1_theta1 = [f1l1_theta_1, f1l1_theta_2]
-f1_theta1 = [i * np.pi/180 for i in f1_theta1]
-
-f1_theta2 = [f1l2_theta_1, f1l2_theta_2]
-f1_theta2 = [i * np.pi/180 for i in f1_theta2]
-
-f1_theta3 = [f1l3_theta_1, f1l3_theta_2]
-f1_theta3 = [i * np.pi/180 for i in f1_theta3]
-
-f0theta_1 = np.linspace(f0l1_theta_1,f0l1_theta_2, N)
-f0theta_1 = f0theta_1 * np.pi/180
-f0theta_2 = np.linspace(f0l2_theta_1, f0l2_theta_2, N)
-f0theta_2 = f0theta_2 * np.pi/180
-f0theta_3 = np.linspace(f0l3_theta_1, f0l3_theta_1, N)
-f0theta_3 = f0theta_3 * np.pi/180
-
-f1theta_1 = np.linspace(f1l1_theta_1,f1l1_theta_2, N)
-f1theta_1 = f1theta_1 * np.pi/180
-f1theta_2 = np.linspace(f1l2_theta_1, f1l2_theta_2, N)
-f1theta_2 = f1theta_2 * np.pi/180
-f1theta_3 = np.linspace(f1l3_theta_1, f1l3_theta_1, N)
-f1theta_3 = f1theta_3 * np.pi/180
-
-x0 = np.zeros((2*len(f0theta_1), len(f0theta_2)))
-y0 = np.zeros((2*len(f0theta_1), len(f0theta_2)))
-
-x1 = np.zeros((2*len(f0theta_1), len(f0theta_2)))
-y1 = np.zeros((2*len(f0theta_1), len(f0theta_2)))
-
-l0 = np.zeros((2*len(f0theta_1), len(f0theta_2)))
-
-for i in range(0,2):
-    for j in range(0, len(f0theta_1)):
-        x0[i,j] = width + f0l1*np.cos(f0theta_1[j]) + f0l2*np.cos(f0theta_1[j]+ f0_theta2[i]) + f0l3*np.cos(f0theta_1[j]+ f0_theta1[i] + f0_theta1[i])
-        y0[i, j] = f0l1*np.sin(f0theta_1[j]) + f0l2*np.sin(f0theta_1[j]+ f0_theta2[i]) + f0l3*np.sin(f0theta_1[j]+ f0_theta1[i] + f0_theta1[i])
-    for k in range(0, len(f0theta_1)):
-        x0[i+2,k] = width + f0l1*np.cos(f0_theta1[i]) + f0l2*np.cos(f0theta_2[k]+ f0_theta1[i]) + f0l3*np.cos(f0theta_1[k]+ f0_theta1[i] + f0theta_1[k])
-        y0[i+2, k] = f0l1*np.sin(f0_theta1[i]) + f0l2*np.sin(f0theta_2[k]+ f0_theta1[i]) + f0l3*np.sin(f0theta_1[k]+ f0_theta1[i] + f0theta_1[k])
-    for l in range(0, len(f0theta_1)):
-        x1[i,l] = f1l1*np.cos(f1theta_1[l]) - f1l2*np.cos(f1theta_1[l]+ f1_theta2[i]) + f1l3*np.cos(f1theta_1[l]+ f1_theta1[i] + f1_theta1[i])
-        y1[i, l] = f1l1*np.sin(f1theta_1[l]) - f1l2*np.sin(f1theta_1[l]+ f1_theta2[i]) + f1l3*np.sin(f1theta_1[l]+ f1_theta1[i] + f1_theta1[i])
-    for m in range(0, len(f0theta_1)):
-        x1[i+2,m] = f1l1*np.cos(f1_theta1[i]) - f1l2*np.cos(f1theta_2[m]+ f1_theta1[i]) + f1l3*np.cos(f1theta_1[m]+ f1_theta1[i] + f1theta_1[m])
-        y1[i+2, m] = f1l1*np.sin(f1_theta1[i]) - f1l2*np.sin(f1theta_2[m]+ f1_theta1[i]) + f1l3*np.sin(f1theta_1[m]+ f1_theta1[i] + f1theta_1[m])
-
-begin = np.asarray([[x, y] for x in np.linspace(-0.1, 0.15, 20) for y in np.linspace(-0.1, 0.15, 20)])
-end = np.asarray([[x+0.039, y] for x in np.linspace(-0.1, 0.15, 20) for y in np.linspace(-0.1, 0.15, 20)])
-plt.plot(x0.T, y0.T, color='blue')
-
-
-_eps = 0.00001
-_huge = np.inf
-
-
-for i in end:
-    inside = 0
-    for k,j in enumerate(x0):
-        
-        for edge in range(len(j)-1):
-        
-            A = [x0[k][edge], y0[k][edge]]
-            B = [x0[k][edge+1], y0[k][edge+1]]
-        
-            if A[1] > B[1]:
-                A, B = B, A
-            if i[1] == A[1]:
-                i[1] += _eps
-            if i[1] == B[1]:
-                i[1] -= _eps
-            if i[1] > B[1] or i[1] < A[1] or i[0] > max(A[0], B[0]):
-                # The horizontal ray does not intersect with the edge
-                continue
-
-            if i[0] < min(A[0], B[0]): # The ray intersects with the edge
-                inside +=1
-                continue
-
-            try:
-                m_edge = (B[1] - A[1]) / (B[0] - A[0])
-            except ZeroDivisionError:
-                m_edge = _huge
-
-            try:
-                m_point = (i[1] - A[1]) / (i[0] - A[0])
-            except ZeroDivisionError:
-                m_point = _huge
-
-            if m_point >= m_edge:
-                # The ray intersects with the edge
-                inside +=1
-                continue
-
-    if inside%2 != 0:
-        plt.scatter(i[0],i[1], color='green')
-              
-    else:
-        plt.scatter(i[0],i[1], color='red')
-  
-#for i in begin:
-#    plt.scatter(i[0],i[1], color='yellow')
-    
-
-
-
-#fig, ax = plt.subplots()
-
-
-
-#patch = patches.Polygon(a0, facecolor='orange')
-#ax.add_patch(patch)
-#plt.plot(x1.T, y1.T, color='red')
-
-
-#x1 = np.array(x1).reshape(-1)
-#y1 = np.array(y1).reshape(-1)
-
-#m = np.asarray(list(zip(x0, y0))).reshape(-1, 2)
-
-#ar1 = p.contains_points(begin, radius=1e-9)
-
-#p2 = path.Path()
-
-#ar0 = p2.contains_points(end, radius=1e-9)
-iar = []
-
-
-#for i in range(len(ar0)):
-#    if ar0[i] == True:# and ar0[i] == ar1[i]:
-#         iar.append(i)
-#         print(i)
-        
-#for i in iar:
-#    plt.scatter(begin[i][0], begin[i][1], color='orange')
-#    plt.scatter(end[i][0], end[i][1], color='red')
-plt.show()
-"""
+#source:http://www.philliplemons.com/posts/ray-casting-algorithm 
