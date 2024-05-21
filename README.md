@@ -67,7 +67,7 @@ Some examples of what this looks like are:
 
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_496_0w_t_s.png?raw=true)
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_496_0w_t_t.png?raw=true)
-![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_520_0w_s_a.png?raw=true)
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_520_0w_s_a.png?raw=true)
 
 
 ## Todo:
