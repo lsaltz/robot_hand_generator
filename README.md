@@ -65,11 +65,11 @@ Some examples of what this looks like are:
 
 <p align="left">Horizontal Line Test: </p>
 
-![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_496_0w_t_s.png.png?raw=true)
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_496_0w_t_s.png?raw=true)
 
 <p align="left">Angles Test: </p>
 
-![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_496_0w_t_t.png.png?raw=true)
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_496_0w_t_t.png?raw=true)
 
 <p align="left">Area Test: </p>
 
