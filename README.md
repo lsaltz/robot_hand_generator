@@ -1,7 +1,11 @@
 [![DOI](https://zenodo.org/badge/449414021.svg)](https://zenodo.org/badge/latestdoi/449414021)
 # robot_hand_generator_MLS: evolutionary algorithm edition
 A tool used to generate the best symmetrical two-fingered hand design to pick up and hold onto a cube. Currently tests the hand's range of motion while maintaining x distance between distal links.
-
+This tool runs three different tests and generates the best two-fingered gripper as found by each of those tests. The tests consist of:
+- the number of reachable center points as separated by a horizontal line of a fixed width
+- the number of reachable center points as separated by lines of fixed widths at different angles
+- the area of overlap between both fingers' reachable space, found using inverse kinematics
+  
 ## Requirements:
 - Linux OS or WSL with ubuntu
 
@@ -50,48 +54,23 @@ Ubuntu is currently the only tested method for executing this program.
     ```
     and specify for how many generations you would like to run it for. The more you enter, the longer it will take. 
     
-    Currently, I have it set to run only in the terminal. If you wish to view the visual testing process(slower), navigate to:
-    
-    ```console
-    cd ~/robot_hand_generator_MLS/src/
-    ```
-    Open the file with nano or your editor of choice:
-    
-    ```console
-    nano testing.py
-    ```
-    And change:
-     ```console
-     physicsClient = p.connect(p.DIRECT)
-    ```
-    To:
-     ```console
-     physicsClient = p.connect(p.GUI)
-    ```
    
 ## What the outputs mean:
 
-After ea.py finishes running, it will send all the data it gathered to a text file called "results.txt" located in ~/robot_hand_generator_MLS/output.
-It lists the winning hand and its location as well as its length ratios of palm to fingers and proximal to distal links. 
-It also lists the runner up hand and the results of the other hands. 
-In the output folder, you can also find a graph of the overall fitness trend, an overall graph of all the points from the top 10%, and graphs of the top and bottom 10% of grippers generated. 
+After ea.py finishes running, it will send all the data it gathered from each test to three separate results text files located in ~/robot_hand_generator_MLS/output.
+
+In the output folder you can also find a graph of the overall fitness trend and charts of the tests conducted on the top 10 hands.
 
 Some examples of what this looks like are:
-![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/results.png?raw=true)
-![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/fitness_trend.png?raw=true)
+
 <p align="left">Winning hand: </p>
 
-![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_5_2m.png?raw=true)
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_496_0w_t_s.png?raw=true)
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_496_0w_t_t.png?raw=true)
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_520_0w_s_a.png?raw=true)
 
-<p align="left">Overall points of top 10%: </p>
-
-![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/overall_graph.png?raw=true)
-
-Currently the maximum amount of times this code has been run is 25. I plan to run it 500 times once I return to my desktop.
 
 ## Todo:
-- Optimize
-- Run 500+ times
 
 
 ## Additional Notes:
