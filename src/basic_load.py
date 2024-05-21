@@ -55,3 +55,5 @@ def load(file_path):
                 p.setJointMotorControl2(hand_id, i, p.POSITION_CONTROL, targetPosition=linkPos)
 
 
+if __name__ == "__main__":
+    load("../output/hand_mut_gen_0_a/hand/hand_mut_gen_0_a.urdf")

@@ -70,7 +70,7 @@ class Mutate:
         right = self.data.ratio.finger_0
         left = self.data.ratio.finger_1
         
-        palm_width = self.data.length.palm
+        palm_width = round(random.uniform(0.05, 0.09), 5)
         
         fingers_total_length = 0.288
         finger_0_length = fingers_total_length/(right+left) * right

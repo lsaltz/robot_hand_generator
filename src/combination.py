@@ -42,8 +42,8 @@ class crossoverFunctions:
         hand_data.ratio.segs[finger] = seg_ratios
         
         hand_data.update()
-        child.update()
-        return hand_data, child   
+        
+        return hand_data  
     
     def keep_finger(self, ls, totalfingerlength, finger, hand_data):
         seg_ratios = ls
@@ -55,8 +55,8 @@ class crossoverFunctions:
         hand_data.ratio.segs[finger] = seg_ratios
         
         hand_data.update()
-        child.update()
-        return hand_data, child
+        
+        return hand_data
         
     def choose_palm_width(self, p):
         choice = random.randint(1,3)
@@ -66,13 +66,13 @@ class crossoverFunctions:
             palm_width = round(random.uniform(0.05, 0.09), 5)
         return palm_width
         
-    def combo(self, p0, p1, num, n, nu):
+    def combo(self, p0, p1, num, n, nu, letter):
         hand_data0 = Dict()
         hand_data1 = Dict()
 
         
-        fn0 = "child_0_" + str(num) + "_" + str(nu) + n
-        fn1 = "child_1_" + str(num) + "_" + str(nu) + n
+        fn0 = "child_0_" + str(num) + "_" + str(nu) + n + "_" + str(letter)
+        fn1 = "child_1_" + str(num) + "_" + str(nu) + n + "_" + str(letter)
 
         
         p0f0 = random.randint(1,10)
@@ -92,13 +92,13 @@ class crossoverFunctions:
 
         
         
-        hand_data0, c0 = self.build_fingers(p1.ratio.segs.finger_0, p0.ratio.segs.finger_0, finger_0_0, "finger_0", c0, hand_data0, parent1)
-        hand_data0, c0 = self.keep_finger(p0.ratio.segs.finger_1, finger_0_1, "finger_1", c0, hand_data0)
+        hand_data0 = self.build_fingers(p1.ratio.segs.finger_0, p0.ratio.segs.finger_0, finger_0_0, "finger_0", hand_data0)
+        hand_data0 = self.keep_finger(p0.ratio.segs.finger_1, finger_0_1, "finger_1", hand_data0)
         hand_data0.finger_1.num_segs = p0.finger_1.num_segs
         
         hand_data0.ratio.segs.finger_1 = p0.ratio.segs.finger_1
-        hand_data1, c1 = self.build_fingers(p0.ratio.segs.finger_1, p1.ratio.segs.finger_1, finger_1_1, "finger_1", c1, hand_data1, parent2)
-        hand_data1, c1 = self.keep_finger(p1.ratio.segs.finger_0, finger_1_0, "finger_0", c1, hand_data1)
+        hand_data1 = self.build_fingers(p0.ratio.segs.finger_1, p1.ratio.segs.finger_1, finger_1_1, "finger_1", hand_data1)
+        hand_data1 = self.keep_finger(p1.ratio.segs.finger_0, finger_1_0, "finger_0", hand_data1)
         hand_data1.finger_0.num_segs = p1.finger_0.num_segs 
         hand_data1.ratio.segs.finger_0 = p1.ratio.segs.finger_0
         
