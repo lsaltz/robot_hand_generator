@@ -52,8 +52,8 @@ def carrier(genList, ls, first, generation, letter):
     fittest_dic = next((d for d in ls if d['name'] == first), None)
     name = fittest_dic['name']
      
-    for l in range(len(genList)):
-        recipient_dic = genList[l]
+    for l in range(5):
+        recipient_dic = genList[random.randint(0,len(genList)-1)]
         newList.extend(crossover(fittest_dic, recipient_dic, generation, "w", l, letter))
     return newList
 
@@ -173,13 +173,13 @@ def save_all_hands(ls):
         new_j = json.dumps(ls)
         handsFile.write(new_j)
         handsFile.close()    
-                
+               
 if __name__ == "__main__":
     print("Please input the integer number of generations you would like to run this for: ")
     gen = int(input())+1  #generations ea runs for
     
     
-    
+    prev_gen = []
     ls = []    #total list of grippers
     cycle_fitness = []
     fitnesses = []
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     generational_fitness_straight = []
     combine = combination.crossoverFunctions(0)
     
-    for n in range(50):
+    for n in range(30):
         g0 = first_generation.First_Generation(0, n)
         tmpList.append(g0.build_hand())
     genList.extend(tmpList)
@@ -263,9 +263,6 @@ if __name__ == "__main__":
         print(num)
         genList = []
         cycle_fitness = []
-        areafitnesses = []
-        anglefitnesses = []
-        straightfitnesses = []
         
         firstArea = max(sortedScoring, key=lambda item:item[0])[3].split(".")[0]
         firstAngle = max(sortedScoring, key=lambda item:item[1])[3].split(".")[0]
@@ -276,10 +273,11 @@ if __name__ == "__main__":
         mut_ran = []
         for l in tmpList:
             if str(l['name']) == str(firstArea) or str(l['name']) == str(firstAngle) or str(l['name']) == str(firstStraight):
-                genList.append(l)
-            
+                genList.append(copy.deepcopy(l))
+                tmpList.remove(l)
+
         for i in range(mx):
-            mutt = tmpList[random.randint(0,len(tmpList)-1)]
+            mutt = copy.deepcopy(tmpList[random.randint(0,len(tmpList)-1)])
             mut_ran.extend(mut_on_first(tmpList, mutt.name, num, i))
             genList.append(mutt)
         
@@ -290,7 +288,7 @@ if __name__ == "__main__":
         genList.extend(mutationArea)
         genList.extend(mutationAngle)
         genList.extend(mutationStraight)
-        print(genList)
+        
         
         
         cycle_fitness.extend(test(genList, num))
@@ -312,31 +310,23 @@ if __name__ == "__main__":
         genList.extend(carrierList2)
         genList.extend(carrierList3)
         genList.extend(eoList)
-        ls.extend(carrierList1)  #testing and getting scores of those combinations
-        ls.extend(carrierList2) 
-        ls.extend(carrierList3) 
         
+        ls.extend(genList)
+
         sortedScoring.extend(cycle_fitness)
 
         firstArea = max(sortedScoring, key=lambda item:item[0])[3].split(".")[0]
         firstAngle = max(sortedScoring, key=lambda item:item[1])[3].split(".")[0]
         firstStraight = max(sortedScoring, key=lambda item:item[2])[3].split(".")[0]
         
-    
-        areafitnesses = copy.deepcopy([t[0] for t in cycle_fitness])
-        anglefitnesses = copy.deepcopy([t[1] for t in cycle_fitness])
-        straightfitnesses = copy.deepcopy([t[2] for t in cycle_fitness])
-        generational_fitness_area.append(max(areafitnesses))
-        generational_fitness_angle.append(max(anglefitnesses))
-        generational_fitness_straight.append(max(straightfitnesses))
+        generational_fitness_area.append(max(sortedScoring, key=lambda item:item[0])[0])
+        generational_fitness_angle.append(max(sortedScoring, key=lambda item:item[1])[1])
+        generational_fitness_straight.append(max(sortedScoring, key=lambda item:item[2])[2])
         tmpList.clear()
         tmpList = copy.deepcopy(genList)
         
         genList.clear()
         cycle_fitness.clear()
-        areafitnesses.clear()
-        anglefitnesses.clear()
-        straightfitnesses.clear()
     
         
     

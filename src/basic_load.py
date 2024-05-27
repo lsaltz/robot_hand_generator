@@ -17,7 +17,7 @@ def load(file_path):
 
     # Setup simulator
 
-    physics_client = p.connect(p.GUI)
+    physics_client = p.connect(p.GUI, options="--opengl2")
 
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
@@ -56,4 +56,4 @@ def load(file_path):
 
 
 if __name__ == "__main__":
-    load("../output/hand_mut_gen_0_a/hand/hand_mut_gen_0_a.urdf")
+    load("../output/child_1_52_1w_a/hand/child_1_52_1w_a.urdf")
