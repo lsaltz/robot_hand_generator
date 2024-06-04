@@ -36,18 +36,18 @@ class WorkSpace_Test:
         seg_lengths0, seg_lengths1 = self.get_data()
         right_coords = self.build_coord_space_right(seg_lengths0)
         left_coords = self.build_coord_space_left(seg_lengths1)
-        c_a, r_a, l_a = self.angles_coordinates(right_coords, left_coords)
+        #c_a, r_a, l_a = self.angles_coordinates(right_coords, left_coords)
         c_s, r_s, l_s = self.straight_coordinates(right_coords, left_coords)
         self.fitness_data.name = self.name
         self.fitness_data.coord_space_right = right_coords.tolist()
         self.fitness_data.coord_space_left = left_coords.tolist()
         self.fitness_data.width = self.width
-        area_ans = abs(self.area_test(right_coords, left_coords))
+        #area_ans = abs(self.area_test(right_coords, left_coords))
         print(self.name)
-        print(area_ans)
+        #print(area_ans)
         
-        angles_ans = self.angles_test(right_coords, left_coords, c_a, r_a, l_a)
-        print(angles_ans)
+        #angles_ans = self.angles_test(right_coords, left_coords, c_a, r_a, l_a)
+        #print(angles_ans)
         straight_ans = self.straight_test(right_coords, left_coords, c_s, r_s, l_s)
         print(straight_ans)
         self.fitness_data.update()
@@ -55,7 +55,7 @@ class WorkSpace_Test:
         
         
         
-        return area_ans, angles_ans, straight_ans
+        return straight_ans #, angles_ans, straight_ans
         
     def save_data(self):
         with open(f"../points/{self.name}.json", mode="w") as dataFile:
@@ -306,7 +306,7 @@ class WorkSpace_Test:
         
     def angles_coordinates(self, right_coords, left_coords):
         finger_z = 0.288
-        val = 0.01
+        val = 0.02
         rad = 0.039/2
         total_height = 0.288
         x_out0, y_out0 = np.split(right_coords, 2, axis=1)
@@ -356,7 +356,7 @@ class WorkSpace_Test:
 
     def straight_coordinates(self, right_coords, left_coords):
         finger_z = 0.288
-        val = 0.01
+        val = 0.02
         
         x_out0, y_out0 = np.split(right_coords, 2, axis=1)
         x_out1, y_out1 = np.split(left_coords, 2, axis=1)

@@ -56,4 +56,4 @@ def load(file_path):
 
 
 if __name__ == "__main__":
-    load("../output/child_1_52_1w_a/hand/child_1_52_1w_a.urdf")
+    load("../output/child_1_4439_1eo_eo/hand/child_1_4439_1eo_eo.urdf")

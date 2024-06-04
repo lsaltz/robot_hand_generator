@@ -27,9 +27,9 @@ class Plot:
         
         data = self.get_data()
         self.coordinates(data)
-        self.plot_area(data)  
+        #self.plot_area(data)  
         self.plot_straight(data)
-        self.plot_angles(data)
+        #self.plot_angles(data)
          
     def get_data(self):
         with open(f"../points/{self.name}.json", mode="r") as p:
@@ -121,7 +121,7 @@ class Plot:
     def coordinates(self, data):
         
         finger_z = 0.288
-        val = 0.01
+        val = 0.02
         
         x_out0, y_out0 = np.split(np.asarray(data.coord_space_right), 2, axis=1)
         x_out1, y_out1 = np.split(np.asarray(data.coord_space_left), 2, axis=1)
