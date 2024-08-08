@@ -17,6 +17,7 @@ from addict import Dict
 import json
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
+import sys
 
 
 
@@ -36,8 +37,8 @@ class WorkSpace_Test:
         seg_lengths0, seg_lengths1 = self.get_data()
         right_coords = self.build_coord_space_right(seg_lengths0)
         left_coords = self.build_coord_space_left(seg_lengths1)
-        #c_a, r_a, l_a = self.angles_coordinates(right_coords, left_coords)
-        #c_s, r_s, l_s = self.straight_coordinates(0.02, right_coords, left_coords)
+        c_a, r_a, l_a = self.angles_coordinates(right_coords, left_coords)
+        c_s, r_s, l_s = self.straight_coordinates(0.02, right_coords, left_coords)
         c_s = self.area_coordinates(0.02, right_coords, left_coords)
         self.fitness_data.name = self.name
         self.fitness_data.coord_space_right = right_coords.tolist()
@@ -47,16 +48,16 @@ class WorkSpace_Test:
         print(self.name)
         print(area_ans)
         
-        #angles_ans = self.angles_test(right_coords, left_coords, c_a, r_a, l_a)
-        #print(angles_ans)
-        #straight_ans = self.straight_test(right_coords, left_coords, c_s, r_s, l_s)
-        #print(straight_ans)
+        angles_ans = self.angles_test(right_coords, left_coords, c_a, r_a, l_a)
+        print(angles_ans)
+        straight_ans = self.straight_test(right_coords, left_coords, c_s, r_s, l_s)
+        print(straight_ans)
         self.fitness_data.update()
-        self.save_data()
         
         
         
-        return area_ans #, angles_ans, straight_ans
+        
+        #return area_ans #, angles_ans, straight_ans
         
     def save_data(self):
         with open(f"../points/{self.name}.json", mode="w") as dataFile:
@@ -168,19 +169,6 @@ class WorkSpace_Test:
         ind = self.straight_raycasting(r, l)
         
         ind2 = self.straight_raycasting(l, r)
-        
-        inside.extend([list(l[i]) for i in range(len(l)) if i in ind])
-        inside.extend([list(r[i]) for i in range(len(r)) if i in ind2])
-        
-        
-        ans = len(inside)
-        
-        inside_x, inside_y = np.hsplit(np.asarray(inside), 2)
-        
-        self.fitness_data.area_outline_x = inside_x.tolist()
-        self.fitness_data.area_outline_y = inside_y.tolist()
-        self.fitness_data.update()
-        """
         for i in range(len(l)):
             if i in ind:
                 if l[i][1] >= 0:
@@ -204,7 +192,7 @@ class WorkSpace_Test:
         else:
             ans = polygon.area
         
-        
+        """
         for i in r:
             ri.append([i[0], i[1]])
         for i in l:
@@ -256,6 +244,10 @@ class WorkSpace_Test:
         
         """
         
+        #ans = len(ind3) * 0.01 * 0.01
+        self.fitness_data.area_outline_x = insidex
+        self.fitness_data.area_outline_y = insidey
+        self.fitness_data.update()
         
         return ans
        
@@ -508,3 +500,13 @@ class WorkSpace_Test:
         
         
         return center_pt
+def read_json(f):
+    with open(f, "r") as fi:
+        data = Dict(json.load(fi))
+    return data
+
+if __name__ == "__main__":
+    name = sys.argv[2]
+    hand_data = read_json(name)
+    w = WorkSpace_Test(name, hand_data)
+    w.main()

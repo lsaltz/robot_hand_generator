@@ -19,14 +19,27 @@ import build_hand as bh
 import angles_plot
 import json
 
-def get_data(filename, gen):
-    data = []
-    for i in range(gen):
-        if i % 2 == 0 and i != 0: ################################change to 50!!!!!!!!!!!!!!!!
-            with open(f"../output/{filename}{i}.json", mode="r") as p:
-                data.extend(json.load(p))
-    return data    
-   
 
-data = get_data("sortedScoring", 5)
-print(data)
+
+
+
+def area_test():
+    iinside = [[[0, 1],[2, 3],[4,5]],
+                [[0,0],[0,0],[0,0]],
+                [[2,3],[4,5],[7,8]]]
+    iinside = np.asarray(iinside)
+        
+    zero_mask = np.all(iinside == 0, axis=(1, 2))
+    
+
+    zero_indices = np.where(zero_mask)[0]
+    print(zero_indices)
+    no_zeros = iinside[~zero_mask]
+    
+
+    split_indices = zero_indices - np.arange(len(zero_indices))
+    arrs = np.split(no_zeros, split_indices)
+        
+    print(arrs)
+    
+area_test()

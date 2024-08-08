@@ -248,7 +248,7 @@ if __name__ == "__main__":
     ls.extend(genList)
     first= max(cycle_fitness, key=lambda item:item[0])[1].split(".")[0]
     cycle_fitness = sorted(cycle_fitness, key = lambda x: float(x[0]))
-    topStraight = get_top_10(cycle_fitness)
+    topArea = get_top_10(cycle_fitness)
     #firstAngle = max(cycle_fitness, key=lambda item:item[1])[3].split(".")[0]
     #firstStraight = max(cycle_fitness, key=lambda item:item[2])[3].split(".")[0]
     
@@ -297,8 +297,8 @@ if __name__ == "__main__":
             mut_ran.extend(mut_on_first(tmpList, mutt.name, num, i))
             genList.append(mutt)
         for i in range(15):
-            mutations.extend(mut_on_first(tmpList, topStraight[i], num, (i+5)))
-            genList.extend(copy.deepcopy([j for j in tmpList if j.name == topStraight[i] and j not in genList]))
+            mutations.extend(mut_on_first(tmpList, topArea[i], num, (i+5)))
+            genList.extend(copy.deepcopy([j for j in tmpList if j.name == topArea[i] and j not in genList]))
             
         #mutationAngle = mut_on_first(ls, firstAngle, num, "t")
         #mutationStraight = mut_on_first(ls, firstStraight, num, "s")
@@ -350,9 +350,9 @@ if __name__ == "__main__":
         first = max(cycle_fitness, key=lambda item:item[0])[1].split(".")[0]
         cycle_fitness = sorted(cycle_fitness, key = lambda x: float(x[0]))
         #topArea = get_top_10(cycle_fitness) 
-        topStraight = get_top_10(cycle_fitness) 
+        topArea = get_top_10(cycle_fitness) 
         cycle_fitness.clear()
-        
+        first_fittest_dic = copy.deepcopy([i for i in ls if i['name'] == first])
         if (num % 50) == 0: ###########################################################CHANGE TO 50
             save_all_hands(ls, f"totallist{num}")
             save_all_hands(sortedScoring,f"sortedScoring{num}")
@@ -360,7 +360,7 @@ if __name__ == "__main__":
             ls.clear()
             sortedScoring.clear()
             generational_fitness.clear()
-           
+            ls.extend(first_fittest_dic)     
         
     sortedScoring = list(get_data("sortedScoring", gen))
     
@@ -373,18 +373,18 @@ if __name__ == "__main__":
     #firstStraight = max(sortedScoringStraight, key=lambda item:item[2])[3].split(".")[0]
     #topArea = get_top_10(sortedScoring)
     #topAngle = get_top_10(sortedScoringAngle)
-    topStraight = get_top_10(sortedScoring)
+    topArea = get_top_10(sortedScoring)
     ls = list([Dict(i) for i in get_data("totallist", gen)])
     
     save_all_hands(ls, "totallistfile")
     #write_to_file(ls, firstArea, sortedScoring, topArea, "area") #bottom)
     #write_to_file(ls, firstAngle, sortedScoringAngle, topAngle, "angle")
-    write_to_file(ls, first, sortedScoring, topStraight, "straight")
+    write_to_file(ls, first, sortedScoring, topArea, "area")
     sortedScoring.clear()
     generational_fitness = list(get_data("generationalfitness", gen))
-    #plot_fitness(generational_fitness_area, gen, "a")
+    plot_fitness(generational_fitness, gen, "a")
     #plot_fitness(generational_fitness_angle, gen, "t")
-    plot_fitness(generational_fitness, gen, "s")
+    #plot_fitness(generational_fitness, gen, "s")
     
     
     generate_json(ls, first)
@@ -392,20 +392,21 @@ if __name__ == "__main__":
     #generate_json(ls, firstStraight)
     
     ls.clear()
-    """
+    
     for top in topArea:
         name = top
         
         p = angles_plot.Plot(name)
         p.main()
-    
+    """
     for top in topAngle:
         name = top
         p = angles_plot.Plot(name)
         p.main()
-    """
+
     for top in topStraight:
         name = top
         p = angles_plot.Plot(name)
         p.main()
-    #open_file(first)   
+    """
+#open_file(first)   

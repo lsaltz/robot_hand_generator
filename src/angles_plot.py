@@ -26,9 +26,9 @@ class Plot:
     def main(self):
         
         data = self.get_data()
-        self.coordinates(data)
-        #self.plot_area(data)  
-        self.plot_straight(data)
+        self.coordinates(0.02, data) #0.02
+        self.plot_area(data)  
+        #self.plot_straight(data)
         #self.plot_angles(data)
          
     def get_data(self):
@@ -118,10 +118,10 @@ class Plot:
         
         
         
-    def coordinates(self, data):
+    def coordinates(self, val, data):
         
         finger_z = 0.288
-        val = 0.02
+        
         
         x_out0, y_out0 = np.split(np.asarray(data.coord_space_right), 2, axis=1)
         x_out1, y_out1 = np.split(np.asarray(data.coord_space_left), 2, axis=1)
@@ -148,7 +148,7 @@ class Plot:
             elif i[1] <min(y_out0) or i[1] > max(y_out0) or i[1] < min(y_out1) or i[1] > max(y_out1):
                 self.center_pts.remove(i)
                 
-       
+    
             
         
       
