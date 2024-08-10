@@ -165,12 +165,14 @@ class WorkSpace_Test:
         iinside = []
         ans = 0
         
-        ind = self.straight_raycasting(r, l)
+        ind = self.straight_raycasting(r, coords)
         
-        ind2 = self.straight_raycasting(l, r)
+        ind2 = self.straight_raycasting(l, coords)
         
-        inside.extend([list(l[i]) for i in range(len(l)) if i in ind])
-        inside.extend([list(r[i]) for i in range(len(r)) if i in ind2])
+        inside.extend(list(coords[i]) for i in range(len(coords)) if i in ind and i in ind2)
+
+        #inside.extend([list(coords[i]) for i in range(len(coords)) if i in ind])
+        #inside.extend([list(r[i]) for i in range(len(r)) if i in ind2])
         
         
         ans = len(inside)
