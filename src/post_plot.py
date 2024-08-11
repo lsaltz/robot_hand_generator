@@ -39,7 +39,7 @@ def plot_fitness(generational_fitness, letter):
     
     #plt.savefig(f"../output/fitness_{letter}")
     plt.savefig(f"../output/fitness_{letter}")
-plot_fitness("../output/generational_s.json", "a")
+plot_fitness("../output/generational_a.json", "a")
 
 #plot_fitness("../output/generational_s.json", "s")
 #plot_fitness("../output/generational_t.json", "t")

@@ -26,9 +26,9 @@ class Plot:
     def main(self):
         
         data = self.get_data()
-        self.coordinates(0.02, data) #0.02
-        self.plot_area(data)  
-        #self.plot_straight(data)
+        self.coordinates(0.005, data) #0.02
+        #self.plot_area(data)  
+        self.plot_straight(data)
         #self.plot_angles(data)
          
     def get_data(self):
