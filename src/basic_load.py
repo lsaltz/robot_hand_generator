@@ -1,4 +1,4 @@
-#Adapted from its original by Marshall Saltz
+#Adapted from its original (Kyle DuFrene and Keegan Knave) by Marshall Saltz
 
 import pybullet as p
 import pybullet_data
@@ -6,14 +6,8 @@ import pathlib
 import time
 
 def load(file_path):
-    # Resource paths
-    #current_path = str(pathlib.Path().resolve())
-
-    #hand_path = current_path + "INSERT PATH TO FILE HERE EX: /data/hand.urdf"
 
     hand_path = file_path
-
-    #hand_path = current_path + "INSERT PATH TO FILE HERE EX: /data/hand.urdf"
 
     # Setup simulator
 
@@ -54,6 +48,3 @@ def load(file_path):
                 linkPos = p.readUserDebugParameter(LinkId[i])
                 p.setJointMotorControl2(hand_id, i, p.POSITION_CONTROL, targetPosition=linkPos)
 
-
-if __name__ == "__main__":
-    load("../output/child_0_4682_0w_s/hand/child_0_4682_0w_s.urdf")

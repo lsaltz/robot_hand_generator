@@ -1,184 +1,217 @@
 # By Marshall Saltz
 import random
-import numpy as np
-import os
 import json
 import mutations as mutation
 from addict import Dict
-import matplotlib.pyplot as plt
-import time
 import main
-from pathlib import Path
 import basic_load
 import combination
 import first_generation
 import copy
 import test as nt
 import build_hand as bh
-import angles_plot
-#CHANGE PLOTTING FITNESS TO ANGLES_PLOT!
+import plotting
+import params
 
-"""
-Calls combine to combine two files
-Parameters:
-    p0: parent 0
-    p1: parent 1
-    num: generation number
-    s: a letter indicating which mode of combining
-    l: child index
-"""
-def crossover(p0, p1, num, s, l, letter):
-    tmpList = []
+
+def crossover(p0, p1, gen, comb_mode, ind):
+    """
+    Calls combine to combine two files
+    Parameters:
+        p0 - parent 0
+        p1 - parent 1
+        gen - generation number
+        comb_mode - a letter indicating which mode of combining
+        ind - child index
+    Returns:
+        child_list - a list of two child dictionaries created
+    """
+    child_list = []
     d0 = Dict()
     d1 = Dict()
-    c = combination.crossoverFunctions(num)                   
-    d0, d1 = c.combo(p0, p1, num, s, l, letter)
-    tmpList.append(copy.deepcopy(d0))
-    tmpList.append(copy.deepcopy(d1))
-    return tmpList
+    c = combination.crossoverFunctions(p0, p1, comb_mode, ind, gen)                   
+    d0, d1 = c.combo()
+    child_list.append(copy.deepcopy(d0))
+    child_list.append(copy.deepcopy(d1))
+    return child_list
 
-"""
-Acts like a pollen carrier to "spread" the fittest hand's genes to the other hands in the generation. Also loops
-through even and odd dictionaries to combine them
-Parameters:
-    genList: generational list of grippers
-    ls: total list of grippers
-    first: gripper with highest fitness score
-    generation: generation number
-"""
-def carrier(genList, ls, first, generation, letter):    
-     
-    newList = []
-    fittest_dic = next((d for d in ls if d['name'] == first), None)
-    name = fittest_dic['name']
-     
-    for l in range(5):
+
+def carrier(genList, total_list, first, generation):    
+    """
+    Combines the fittest dictionary with a random collection of dictionaries.
+    Parameters:
+        genList - generational list of grippers
+        total_list - total list of grippers
+        first - gripper with highest fitness score
+        generation - generation number
+    Returns:
+        child_list - list of created dictionaries
+    """
+    child_list = []
+    fittest_dic = next((d for d in total_list if d['name'] == first), None)
+    for i in range(params.carrier_num):
         recipient_dic = genList[random.randint(0,len(genList)-1)]
-        newList.extend(crossover(fittest_dic, recipient_dic, generation, "w", l, letter))
-    return newList
+        child_list.extend(crossover(fittest_dic, recipient_dic, generation, "w", i))
+    return child_list
 
-def even_odd(genList, generation, letter):
-     oddDics = []
-     evenDics = []
-     newList = []
-     for c in range(len(genList)):     
-         if c%2 == 0:
-             oddDics.append(copy.deepcopy(genList[c]))
-         else:
-             evenDics.append(copy.deepcopy(genList[c]))
-     minlen = min(len(evenDics), len(oddDics))       
-     for m in range(5):
-         newList.extend(crossover(evenDics[random.randint(0, (len(evenDics) - 1))], oddDics[random.randint(0, (len(oddDics) - 1))], generation, "eo", m, letter))
-     return newList
-     
-def mut_on_first(tomutate, file_to_mutate, num, i):
-    firstList = []
-    
-    
-    c = combination.crossoverFunctions(num)
-    for l in tomutate:
-        if str(l['name']) == str(file_to_mutate):
-            m0 = l
-    
-    
-    m = mutation.Mutate(m0, num, i)
-    firstList.append(m.build_hand())
-    return firstList
+
+def even_odd(genList, generation):
+    """
+    Combines random even dictionaries with random odd dictionaries.
+    Parameters:
+        genList - generational list of grippers
+        generation - generation number
+    Returns:
+        child_list - list of created dictionaries
+    """
+    oddDics = []
+    evenDics = []
+    child_list = []
+    for c in range(len(genList)):     
+        if c%2 == 0:
+            oddDics.append(copy.deepcopy(genList[c]))
+        else:
+            evenDics.append(copy.deepcopy(genList[c]))      
+    for i in range(params.even_odd_num):
+        child_list.extend(crossover(evenDics[random.randint(0, (len(evenDics) - 1))], oddDics[random.randint(0, (len(oddDics) - 1))], generation, "eo", i))
+    return child_list
+
+
+def mutate_files(to_mutate, file_to_mutate, gen, idx):
+    """
+    Mutates selected gripper.
+    Parameters:
+        to_mutate - list of gripper dictionaries to mutate
+        file_to_mutate - name of selected gripper
+        gen - generation number
+        idx - if running multiple mutations, mutation number
+    Returns:
+        mutated_gripper - mutated version of selected gripper
+    """
+    for m in to_mutate:
+        if str(m['name']) == str(file_to_mutate):
+            mutate_dic = m
+    m = mutation.Mutate(mutate_dic, gen, idx)
+    mutated_gripper = m.build_hand()
+    return mutated_gripper
  
 
-def test(dicList, num):
-    tmpFitness = []
-    
-    for l in dicList:
-        
-        gripper_name = l['name']
-        
-            
-        w = nt.WorkSpace_Test(gripper_name, l)     
-        #area_fit, angles_fit, straight_fit = w.main()
-
+def test(dicList, precision):
+    """
+    Runs test on grippers.
+    Parameters:
+        dicList - list of dictionaries to test
+        precision - space in between points (mm)
+    Returns:
+        fitnesses - list of test results
+    """
+    fitnesses = []
+    for l in dicList:    
+        gripper_name = l['name']    
+        w = nt.WorkSpace_Test(gripper_name, l, precision)     
         fit = w.main()
+        fitnesses.append([fit, f"{gripper_name}.json"])
+    
+    return fitnesses
+    
+    
+def get_top(sortedScoring):
+    """
+    Returns top grippers.
+    Parameters:
+        sortedScoring - list of grippers and their scores sorted by score in ascending order
+    Returns:
+        top - list of top grippers and their scores
+        top_names - just the grippers' names
+    """
+    top = []
+    count = 0
+    for d in reversed(range(len(sortedScoring))):
+        if sortedScoring[d] not in top:
+            top.append(sortedScoring[d])
+            count += 1
+        if count > params.winner_count:
+            break
+    top_names = list(map(lambda x:x[1].split('.')[0], top))
+    return top, top_names 
 
-        tmpFitness.append([fit, f"{gripper_name}.json"])
-        
-    return tmpFitness
-    
- 
-    
-    
-    
-def get_top_10(sortedScoring):
-    top_ten = []
-    top_ten.extend(sortedScoring[-15:])
-    top_ten = list(map(lambda x:x[1].split('.')[0], top_ten))
-    return top_ten    
-    
-    
-def write_to_file(ls, fittestFirst, sortedScoring, top_10, metric):#, bottom_10):
-    winning_ratios = Dict()
+
+def write_to_file(total_list, fittestFirst, top_ls, top_names, precision):
+    """
+    Writes results to a file.
+    Parameters:
+        total_list - list of all created dictionaries
+        fittestFirst - the winner
+        top_ls - list of top 20 scores
+        top_names - list of top 20 names
+        precision - coarse or fine
+    """
     winning_file_names = []
-    winning_10_ratios = []
-    name = fittestFirst.split('.')[0]
-    
-    for i in range(len(ls)):
-        if ls[i].name == str(fittestFirst.split('.')[0]):
-            winning_ratios = ls[i]
-    winning_file_names = top_10
-    for x in range(len(ls)):
-        if ls[x].name in winning_file_names:
-              winning_10_ratios.append(ls[x])    
-    with open(f"../output/results_{metric}.txt", mode="w") as resultsFile:
-        resultsFile.write(f"The fittest of them all in {metric} is: " + str(fittestFirst) + "\n")
-        resultsFile.write("Overall top 10 results are: \n" + str(sortedScoring[-10:]) + "\n")
-        for j in range(len(winning_10_ratios)):
-            resultsFile.write(f"{winning_10_ratios[j]}\n")
-        #resultsFile.write("Overall bottom 10% results are: \n" + str(bottom_10) + "\n")
-    resultsFile.close()    
+    winning_ratios = []
+    winning_file_names = top_names
+    for x in range(len(total_list)):
+        if total_list[x].name in winning_file_names:
+              winning_ratios.append(total_list[x])    
+    with open(f"../output/results_{params.flag}_{precision}.txt", mode="w") as resultsFile:
+        resultsFile.write(f"The fittest of them all in {params.flag} test is: " + str(fittestFirst) + "\n")
+        resultsFile.write("Overall top results are: \n" + str(top_ls) + "\n")
+        for j in range(len(winning_ratios)):
+            resultsFile.write(f"{winning_ratios[j]}\n")
+    resultsFile.close()  
 
-def plot_fitness(generational_fitness, generations, letter):
-    epochs = []
-    plt.figure()
-    plt.xlim(0, generations)
-    plt.ylim(0, max(generational_fitness))
-    for i in range(generations):
-        epochs.append(i)
-    plt.xlabel("Generation")
-    plt.ylabel("Percentage of points reached")
-    plt.title("Max fitness of each generation")
-    generational_fitness = list(generational_fitness)
-    plt.plot(epochs, generational_fitness, color='blue', linestyle='solid')
-    plt.savefig(f"../output/fitness_trend_{letter}")
-    with open(f"../output/generational_{letter}.json", mode="w") as resultsFile:
-        new_j = json.dumps(list(zip(epochs, generational_fitness)))
-        resultsFile.write(new_j)
-    resultsFile.close()
 
-def generate_json(ls, first):
+def generate_hands(ls, to_build):
+    """
+    Generates urdf files for grippers.
+    Parameters:
+        ls - total list of dictionaries
+        to_build - gripper to build
+    """
     for l in ls:
-        if l.name == str(first.split('.')[0]):
+        if l.name == str(to_build.split('.')[0]):
             hand_data = l
             break
-    b = bh.Build_Json(l)
+    b = bh.Build_Json(hand_data)
     b.build_hand()
     main.MainScript()
     
-def open_file(fittestFirst):
-    name = fittestFirst.split('.')[0]
+
+def open_file(gripper):
+    """
+    Opens gripper in pybullet.
+    Parameters:
+        gripper - file to open
+    """
+    name = gripper.split('.')[0]
     rt = f"../output/{name}/hand"
     fittest_file = f"{rt}/{name}.urdf"
     basic_load.load(fittest_file) 
     
 
-def save_all_hands(ls, filename):
+def save_all_hands(data, filename):
+    """
+    Saves a file as a json.
+    Parameters:
+        ls - data to save
+        filename - file to save to
+    """
     with open(f"../output/{filename}.json", mode="w") as handsFile:
-        new_j = json.dumps(ls)
+        new_j = json.dumps(data)
         handsFile.write(new_j)
         handsFile.close()   
 
 def get_data(filename, gen):
+    """
+    Gets data from a json. Since it saves every interval, it uses that info to get the file.
+    Parameters:
+        filename - file from which to retreive data
+        gen - generation number
+    Returns:
+        data - data from file (list form)
+    """
     data = []
     for i in range(gen):
-        if i % 50 == 0 and i != 0: ################################change to 50!!!!!!!!!!!!!!!!
+        if i % params.interval == 0 and i != 0:
             with open(f"../output/{filename}{i}.json", mode="r") as p:
                 data.extend(json.load(p))
     return data    
@@ -186,174 +219,116 @@ def get_data(filename, gen):
                       
 if __name__ == "__main__":
     print("Please input the integer number of generations you would like to run this for: ")
-    gen = int(input())+1  #generations ea runs for
+    gen = int(input())+1  # generations ea runs for
     
+    ls = []    # total list of grippers
+    cycle_fitness = []  # list of fitnesses for that generation
+    genList = []    # list of that generation's grippers
+    mutations = []  # results from mutating
+    sortedScoring = []  # sorted scores paired with names
+    tmpList = []    # a temporary list for storing grippers
+    generational_fitness= []    # maximum fitness from each generation
     
-    prev_gen = []
-    ls = []    #total list of grippers
-    cycle_fitness = []
-    fitnesses = []
-    genList = []
-    mutations = []
-    #mutationAngle = [] 
-    #mutationStraight = [] 
-    sortedScoring = []
-    generational_fitness = []
-    tmpList = []
-    generational_fitness= []
-    #sortedScoringArea = []
-    #generational_fitness_angle = []
-    #generational_fitness_straight = []
-    combine = combination.crossoverFunctions(0)
-    
-    for n in range(30): ##########################CHANGE TO 30
+    # gen 0 grippers - init_num amount of grippers
+    for n in range(params.init_num): 
         g0 = first_generation.First_Generation(0, n)
         tmpList.append(g0.build_hand())
     genList.extend(tmpList)
-    
-    #cycle_fitness.extend(test(tmpList, 0))
     ls.extend(tmpList)
     
+    # mutate grippers - mutations_num amount of grippers
+    for i in range(params.mutations_num):
+        genList.append(mutate_files(ls, ls[random.randint(0,len(ls)-1)].name, 0, i))
     
-    
-    #firstArea = max(cycle_fitness, key=lambda item:item[0])[3].split(".")[0]
-    #firstAngle = max(cycle_fitness, key=lambda item:item[1])[3].split(".")[0]
-    #firstStraight = max(cycle_fitness, key=lambda item:item[2])[3].split(".")[0]
-    mx = 20 ##########################CHANGE TO 20
-    #mut_ran = []
-    
-    for i in range(mx):
-        genList.extend(mut_on_first(ls, ls[random.randint(0,len(ls)-1)].name, 0, i))
-    #genList.extend(mut_ran)
-    
-    #mutationArea = mut_on_first(ls, firstArea, 0, "a")
-    #mutationAngle = mut_on_first(ls, firstAngle, 0, "t")
-    #mutationStraight = mut_on_first(ls, firstStraight, 0, "s")
-    
-    #genList.extend(mutationArea)
-    #genList.extend(mutationAngle)
-    #genList.extend(mutationStraight)
-    
-    cycle_fitness.extend(test(genList, 0))
-    #cycle_fitness.extend(test(mutationArea, 0))
-    #cycle_fitness.extend(test(mutationAngle, 0))
-    #cycle_fitness.extend(test(mutationStraight, 0))
-    
-    #ls.extend(mutationArea)
-    #ls.extend(mutationAngle)
-    #ls.extend(mutationStraight)
-    #ls.extend(mut_ran)
-    
+    # test grippers
+    cycle_fitness.extend(test(genList, params.precision1))
     sortedScoring.extend(cycle_fitness)
+
+    # add gripper dictionaries to total list
     ls.extend(genList)
+
+    # get the top grippers
     first= max(cycle_fitness, key=lambda item:item[0])[1].split(".")[0]
     cycle_fitness = sorted(cycle_fitness, key = lambda x: float(x[0]))
-    topArea = get_top_10(cycle_fitness)
-    #firstAngle = max(cycle_fitness, key=lambda item:item[1])[3].split(".")[0]
-    #firstStraight = max(cycle_fitness, key=lambda item:item[2])[3].split(".")[0]
+    top_scores, top_names = get_top(cycle_fitness)
+
+    # append maximum fitness of that generation
+    generational_fitness.append(max(cycle_fitness, key=lambda item:item[0])[0])
     
-    
-    fitnesses = copy.deepcopy([t[0] for t in cycle_fitness])
-    #anglefitnesses = copy.deepcopy([t[1] for t in cycle_fitness])
-    #straightfitnesses = copy.deepcopy([t[2] for t in cycle_fitness])
-    
-    generational_fitness.append(max(fitnesses))
-    #generational_fitness_angle.append(max(anglefitnesses))
-    #generational_fitness_straight.append(max(straightfitnesses))
-    
-    cycle_fitness.clear()
-    fitnesses.clear()
-    #anglefitnesses.clear()
-    #straightfitnesses.clear()
-    
+    cycle_fitness.clear()   
     mutations.clear() 
-    #mutationAngle.clear() 
-    #mutationStraight.clear() 
-    
+
+    # copy gen 0 grippers
+    # Gen 0: init_num + mutations_num amount of grippers
     tmpList = copy.deepcopy(genList)
-    
+
+    # begin generations loop
     for num in range(1, gen):
         
-        genList = []
-        cycle_fitness = []
-        mutations = []
-        
+        genList = []    # list of grippers of current generation
+        cycle_fitness = []  # list of fitnesses for generation
+        mutations = []  # mutation list of grippers on top grippers
+        mut_ran = []    # mutation list of randomly mutrated grippers
 
-        
-        #firstAngle = max(sortedScoring, key=lambda item:item[1])[3].split(".")[0]
-        #firstStraight = max(sortedScoring, key=lambda item:item[2])[3].split(".")[0
-            
-        combine = combination.crossoverFunctions(num)    #set up crossover class
-        
-        mut_ran = []
-        """
-        for l in tmpList:
-            if str(l['name']) == str(firstArea) or str(l['name']) == str(firstAngle) or str(l['name']) == str(firstStraight):
-                genList.append(copy.deepcopy(l))
-                tmpList.remove(l)
-        """
-        for i in range(5):
+        # mutate on random grippers from previous generation - random_mutations_num amount of grippers
+        for i in range(params.random_mutations_num):
             mutt = copy.deepcopy(tmpList[random.randint(0,len(tmpList)-1)])
-            mut_ran.extend(mut_on_first(tmpList, mutt.name, num, i))
+            mut_ran.append(mutate_files(tmpList, mutt.name, num, i))
             genList.append(mutt)
-        for i in range(15):
-            mutations.extend(mut_on_first(tmpList, topArea[i], num, (i+5)))
-            genList.extend(copy.deepcopy([j for j in tmpList if j.name == topArea[i] and j not in genList]))
+
+
+        # mutate on top grippers from previous generation - winner_mutations_num amount of grippers
+        for i in range(params.winner_count):
+            mutations.append(mutate_files(tmpList, top_names[i], num, (i+5)))
+            genList.extend(copy.deepcopy([j for j in tmpList if j.name == top_names[i] and j not in genList]))
             
-        #mutationAngle = mut_on_first(ls, firstAngle, num, "t")
-        #mutationStraight = mut_on_first(ls, firstStraight, num, "s")
+        # append mutations to generation list
         genList.extend(mut_ran)
         genList.extend(mutations)
         
-        #genList.extend(mutationAngle)
-        #genList.extend(mutationStraight)
+        # test grippers (coarse)
+        cycle_fitness.extend(test(genList, params.precision1))
         
-        
-        cycle_fitness.extend(test(genList, num))
-        
-
+        # add generation to total list of grippers
         ls.extend(genList)
-        
-    
-    
-        #carrierList1 = carrier(genList, tmpList, first, num, 'a')    #performs combination
-        carrierList1 = carrier(genList, ls, first, num, 's')
-        cycle_fitness.extend(test(carrierList1, num))
-        #carrierList2 = carrier(genList, ls, firstAngle, num, 't')
-        
-        #cycle_fitness.extend(test(carrierList2, num))
-        
-        #cycle_fitness.extend(test(carrierList3, num))
-        eoList = even_odd(genList, num, "eo")
-        cycle_fitness.extend(test(eoList, num))
-        genList.extend(carrierList1)
-        #genList.extend(carrierList2)
-        #genList.extend(carrierList3)
+
+        # perform combination of winner with grippers - 2 * carrier_num amount of grippers
+        carrierList = carrier(genList, ls, first, num)
+        # test children
+        cycle_fitness.extend(test(carrierList, params.precision1))
+
+        # perform combination of even and odd grippers - 2 * even_odd_num amount of grippers
+        eoList = even_odd(genList, num)
+        # test children
+        cycle_fitness.extend(test(eoList, params.precision1))
+
+        # append to generational list
+        genList.extend(carrierList)
         genList.extend(eoList)
         
+        # append to total list
         ls.extend(genList)
 
+        # append scores and associated names
         sortedScoring.extend(cycle_fitness)
         
-        
-        
-        #firstAngle = max(sortedScoring, key=lambda item:item[1])[3].split(".")[0]
-        #firstStraight = max(sortedScoring, key=lambda item:item[2])[3].split(".")[0]
-        
+        # append maximum generation score
         generational_fitness.append(max(cycle_fitness, key=lambda item:item[0])[0])
-        #generational_fitness_angle.append(max(sortedScoring, key=lambda item:item[1])[1])
-        #generational_fitness_straight.append(max(sortedScoring, key=lambda item:item[2])[2])
+
+        # copy previous generation
         tmpList.clear()
-        tmpList = copy.deepcopy(genList)
-        
+        tmpList = copy.deepcopy(genList)        
         genList.clear()
+
+        # get winner
         first = max(cycle_fitness, key=lambda item:item[0])[1].split(".")[0]
         cycle_fitness = sorted(cycle_fitness, key = lambda x: float(x[0]))
-        #topArea = get_top_10(cycle_fitness) 
-        topArea = get_top_10(cycle_fitness) 
+        top_scores, top_names = get_top(cycle_fitness) 
         cycle_fitness.clear()
         first_fittest_dic = copy.deepcopy([i for i in ls if i['name'] == first])
-        if (num % 50) == 0: ###########################################################CHANGE TO 50
+
+        # save hands at interval so as not to slow things down
+        if (num % params.interval) == 0:
             save_all_hands(ls, f"totallist{num}")
             save_all_hands(sortedScoring,f"sortedScoring{num}")
             save_all_hands(generational_fitness, f"generationalfitness{num}")
@@ -362,51 +337,48 @@ if __name__ == "__main__":
             generational_fitness.clear()
             ls.extend(first_fittest_dic)     
         
+    # get and sort scoring data
     sortedScoring = list(get_data("sortedScoring", gen))
-    
     sortedScoring = sorted(sortedScoring, key = lambda x: float(x[0]))
-    #sortedScoringAngle = sorted(sortedScoring, key = lambda x: float(x[1]))
-    #sortedScoringStraight = sorted(sortedScoring, key = lambda x: float(x[2]))
     
+    # get winners and all hands
     first = max(sortedScoring, key=lambda item:item[0])[1].split(".")[0]
-    #firstAngle = max(sortedScoringAngle, key=lambda item:item[1])[3].split(".")[0]
-    #firstStraight = max(sortedScoringStraight, key=lambda item:item[2])[3].split(".")[0]
-    #topArea = get_top_10(sortedScoring)
-    #topAngle = get_top_10(sortedScoringAngle)
-    topArea = get_top_10(sortedScoring)
+    top_scores, top_names = get_top(sortedScoring)
     ls = list([Dict(i) for i in get_data("totallist", gen)])
     
+    # save all data
     save_all_hands(ls, "totallistfile")
-    #write_to_file(ls, firstArea, sortedScoring, topArea, "area") #bottom)
-    #write_to_file(ls, firstAngle, sortedScoringAngle, topAngle, "angle")
-    write_to_file(ls, first, sortedScoring, topArea, "area")
+    write_to_file(ls, first, top_scores, top_names, "coarse")
+
     sortedScoring.clear()
+
+    # plot generational scores
     generational_fitness = list(get_data("generationalfitness", gen))
-    plot_fitness(generational_fitness, gen, "a")
-    #plot_fitness(generational_fitness_angle, gen, "t")
-    #plot_fitness(generational_fitness, gen, "s")
+    plotting.plot_fitness(generational_fitness, gen)
     
-    
-    generate_json(ls, first)
-    #generate_json(ls, firstAngle)
-    #generate_json(ls, firstStraight)
-    
+    # generate urdf files for winning grippers
+    for name in top_names:
+        generate_hands(ls, name)
+
+    new_test = []   # fine test data
+
+    # copy over dictionaries of top grippers
+    for l in ls:
+        if l.name in top_names and l not in new_test:
+            new_test.append(copy.deepcopy(l))
     ls.clear()
     
-    for top in topArea:
+    # plot coarse data
+    for top in top_names:
         name = top
         
-        p = angles_plot.Plot(name)
-        p.main()
-    """
-    for top in topAngle:
-        name = top
-        p = angles_plot.Plot(name)
+        p = plotting.Plot(name, params.precision1)
         p.main()
 
-    for top in topStraight:
+    # run fine test, save data, and plot
+    new_fitness = test(new_test, params.precision2)
+    write_to_file(new_test, first, new_fitness, top_names, "fine")
+    for top in top_names:
         name = top
-        p = angles_plot.Plot(name)
+        p = plotting.Plot(name, params.precision2)
         p.main()
-    """
-#open_file(first)   
