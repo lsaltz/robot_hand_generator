@@ -1,18 +1,18 @@
 [![DOI](https://zenodo.org/badge/449414021.svg)](https://zenodo.org/badge/latestdoi/449414021)
 # robot_hand_generator_MLS: evolutionary algorithm edition
-A tool used to generate the best symmetrical two-fingered hand design to pick up and hold onto a cube. Currently tests the hand's range of motion while maintaining x distance between distal links.
-This tool runs three different tests and generates the best two-fingered gripper as found by each of those tests. The tests consist of:
-- the number of reachable center points as separated by a horizontal line of a fixed width
-- the number of reachable center points as separated by lines of fixed widths at different angles
-- the area of overlap between both fingers' reachable space, found using inverse kinematics
+A tool used to generate an optimal two-fingered gripper design for grasping an object of a certain width. Achieves this by using an evolutionary algorithm to find the design, and runs three different tests whose results can be compared.
+This tool can run three different tests and generates the best two-fingered gripper as found by each of those tests. The tests are:
+- Straight (default): Number of point pairs separated horizontally by width
+- Angle: The number of reachable angles around a center point
+- Area: Number of points within the overlapping workspaces of both fingers
+After testing at a coarse precision, the program takes the top few hands and tests them at a finer precision.
+
+Parameters are in src/params.py and may be adjusted. 
   
 ## Requirements:
 - Linux OS or WSL with ubuntu
 
-
 ## Install and Setup:
-Ubuntu is currently the only tested method for executing this program.
-
 
 1. Run the following commands:
 
@@ -52,37 +52,23 @@ Ubuntu is currently the only tested method for executing this program.
     ```console
     python3 ea.py
     ```
-    and specify for how many generations you would like to run it for. The more you enter, the longer it will take. 
+    and specify for how many generations you would like to run it for. The more you enter, the longer it will take. For example, 5000 generations on my desktop takes 2-3 days.
     
    
 ## What the outputs mean:
 
-After ea.py finishes running, it will send all the data it gathered from each test to three separate results text files located in ~/robot_hand_generator_MLS/output.
+After ea.py finishes running, it will send the data it gathered from each test on the top few grippers to two different results files located in ~/robot_hand_generator_MLS/output.
 
-In the output folder you can also find a graph of the overall fitness trend and charts of the tests conducted on the top 10 hands.
-
-Some examples of what this looks like are:
-
-<p align="left">Horizontal Line Test: </p>
-
-![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_496_0w_t_s.png?raw=true)
-
-<p align="left">Angles Test: </p>
-
-![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_496_0w_t_t.png?raw=true)
-
-<p align="left">Area Test: </p>
-
-![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/child_0_520_0w_s_a.png?raw=true)
-
-
-## Todo:
+In the output folder you can also find a graph of the overall fitness trend and charts of the test conducted on the top few hands.
 
 
 ## Additional Notes:
-If you wish to run this software more than once, clear your outputs and points folders. If you run into issues with MESA and OpenGL, add the following to ~/.bashrc:
+Requires numpy 1.25.0, you may have to downgrade numpy version.
+If you wish to run this software more than once, clear your outputs, hand_archive, and points folders. If you run into issues with MESA and OpenGL, add the following to ~/.bashrc:
 ```
 export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
 ```
 This project was originally created by Josh Campbell, and has been adjusted by me. The original repository can be found at:
 https://github.com/OSUrobotics/robot_hand_generator
+
+Advised by Kyle DuFrene, Keegan Knave, and Dr. Cindy Grimm.
