@@ -277,9 +277,9 @@ if __name__ == "__main__":
             genList.append(mutt)
 
 
-        # mutate on top grippers from previous generation - winner_mutations_num amount of grippers
+        # mutate on top grippers from previous generation - winner_count amount of grippers
         for i in range(params.winner_count):
-            mutations.append(mutate_files(tmpList, top_names[i], num, (i+5)))
+            mutations.append(mutate_files(tmpList, top_names[i], num, (i+params.random_mutations_num)))
             genList.extend(copy.deepcopy([j for j in tmpList if j.name == top_names[i] and j not in genList]))
             
         # append mutations to generation list
@@ -335,7 +335,8 @@ if __name__ == "__main__":
             ls.clear()
             sortedScoring.clear()
             generational_fitness.clear()
-            ls.extend(first_fittest_dic)     
+            ls.extend(first_fittest_dic) 
+        # Generation gripper count: random_mutations_num + 2*winner_count + 2*carrier_num + 2*even_odd_num
         
     # get and sort scoring data
     sortedScoring = list(get_data("sortedScoring", gen))
@@ -382,3 +383,4 @@ if __name__ == "__main__":
         name = top
         p = plotting.Plot(name, params.precision2)
         p.main()
+
