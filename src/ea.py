@@ -356,8 +356,10 @@ if __name__ == "__main__":
     # plot generational scores
     generational_fitness = list(get_data("generationalfitness", gen))
     plotting.plot_fitness(generational_fitness, gen)
+    plotting.plot_palm_widths(gen)
+    plotting.plot_seg_percents(gen, "finger_0")
+    plotting.plot_seg_percents(gen, "finger_1")
     
-    # generate urdf files for winning grippers
     for name in top_names:
         generate_hands(ls, name)
 
@@ -383,4 +385,3 @@ if __name__ == "__main__":
         name = top
         p = plotting.Plot(name, params.precision2)
         p.main()
-

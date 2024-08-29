@@ -24,12 +24,12 @@ radius - distance of each finger from center point
 #flag = "area"
 
 # Angle test:
-#flag = "angle"
+flag = "angle"
 
 # Straight test:
-flag = "straight"
+#flag = "straight"
 
-precision1 = 0.02
+precision1 = 0.01
 precision2 = 0.005
 interval = 50
 init_num = 30
@@ -38,8 +38,7 @@ random_mutations_num = 5
 carrier_num = 5
 even_odd_num = 5
 winner_count = 20
-trim_val = 0.02
+trim_val = 0.01
 angles_count = 8
 percent_threshold = 95
 radius = 0.039/2
-

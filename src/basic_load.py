@@ -1,13 +1,19 @@
 #Adapted from its original (Kyle DuFrene and Keegan Knave) by Marshall Saltz
-
 import pybullet as p
 import pybullet_data
 import pathlib
 import time
 
-def load(file_path):
+def load(name):
+    """
+    Loads a urdf file in pybullet to view.
+    To view, run file as main and input gripper name with
+    no file extensions.
+    Parameters:
+        name - name of file
+    """
 
-    hand_path = file_path
+    hand_path = f"../output/{name}/hand/{name}.urdf"
 
     # Setup simulator
 
@@ -18,8 +24,6 @@ def load(file_path):
     p.setGravity(0, 0, -10)
 
     p.resetDebugVisualizerCamera(cameraDistance=.02, cameraYaw=0, cameraPitch=-89.9999, cameraTargetPosition=[0, 0.1, 0.5])
-
-
 
     # load plane object
 
@@ -48,3 +52,8 @@ def load(file_path):
                 linkPos = p.readUserDebugParameter(LinkId[i])
                 p.setJointMotorControl2(hand_id, i, p.POSITION_CONTROL, targetPosition=linkPos)
 
+
+if __name__ == "__main__":
+    print("Input gripper name with no file extension: ")
+    name = input()
+    load(name)

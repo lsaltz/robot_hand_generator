@@ -362,13 +362,8 @@ class WorkSpace_Test:
         center_pt = [[x, y] for x in np.linspace(bottom_x, top_x, num=row_points) for y in np.linspace(bottom_y, top_y, num=column_points)]
         
         # check if points are valid
-        for pt in center_pt:
-            if pt[0] < self.width/2 and pt[0] > -abs(self.width)/2 and pt[1] <0:
-                center_pt.remove(pt)
-            elif (pt[0] < min(x_out0) or pt[0] > max(x_out0)) and (pt[0] < min(x_out1) or pt[0] > max(x_out1)):
-                center_pt.remove(pt)
-            elif (pt[1] < min(y_out0) or pt[1] > max(y_out0)) and (pt[1] < min(y_out1) or pt[1] > max(y_out1)):
-                center_pt.remove(pt)
+        center_pt = [pt for pt in center_pt if not ( pt[0] < self.width/2 and pt[0] > -abs(self.width/2) and pt[1] <0) or (pt[0] < min(x_out0) or pt[0] > max(x_out0)) and (pt[0] < min(x_out1) or pt[0] > max(x_out1))
+                           or (pt[1] < min(y_out0) or pt[1] > max(y_out0)) and (pt[1] < min(y_out1) or pt[1] > max(y_out1))]
                 
         # generate coords around center_pt for right finger
         angles = np.linspace(0, 2*np.pi, n, endpoint=False) # angles list
@@ -409,17 +404,12 @@ class WorkSpace_Test:
         column_length = top_y - bottom_y
         row_points = int(row_length/val)
         column_points = int(column_length/val)
-        rad = 0.039/2
+        rad = params.radius
       
         center_pt = [[x, y] for x in np.linspace(bottom_x, top_x, num=row_points) for y in np.linspace(bottom_y, top_y, num=column_points)]
-        for pt in center_pt:
-            if pt[0] < self.width/2 and pt[0] > -abs(self.width)/2 and pt[1] <0:
-                center_pt.remove(pt)
-            elif (pt[0] < min(x_out0) or pt[0] > max(x_out0)) and (pt[0] < min(x_out1) or pt[0] > max(x_out1)):
-                center_pt.remove(pt)
-            elif (pt[1] < min(y_out0) or pt[1] > max(y_out0)) and (pt[1] < min(y_out1) or pt[1] > max(y_out1)):
-                center_pt.remove(pt)
-
+        center_pt = [pt for pt in center_pt if not ( pt[0] < self.width/2 and pt[0] > -abs(self.width/2) and pt[1] <0) or (pt[0] < min(x_out0) or pt[0] > max(x_out0)) and (pt[0] < min(x_out1) or pt[0] > max(x_out1))
+                           or (pt[1] < min(y_out0) or pt[1] > max(y_out0)) and (pt[1] < min(y_out1) or pt[1] > max(y_out1))]
+        
 
         x0 = [(c[0] + rad) for c in center_pt]
         y0 = [c[1] for c in center_pt]
@@ -455,14 +445,10 @@ class WorkSpace_Test:
         column_length = top_y - bottom_y
         row_points = int(row_length/val)
         column_points = int(column_length/val)
-        
+        rad = params.radius
         center_pt = [[x, y] for x in np.linspace(bottom_x, top_x, num=row_points) for y in np.linspace(bottom_y, top_y, num=column_points)]
         
-        for pt in center_pt:
-            if pt[0] < self.width/2 and pt[0] > -abs(self.width)/2 and pt[1] <0:
-                center_pt.remove(pt)
-            elif (pt[0] < min(x_out0) or pt[0] > max(x_out0)) and (pt[0] < min(x_out1) or pt[0] > max(x_out1)):
-                center_pt.remove(pt)
-            elif (pt[1] < min(y_out0) or pt[1] > max(y_out0)) and (pt[1] < min(y_out1) or pt[1] > max(y_out1)):
-                center_pt.remove(pt)
+        center_pt = [pt for pt in center_pt if not ( pt[0] < self.width/2 and pt[0] > -abs(self.width/2) and pt[1] <0) or (pt[0] < min(x_out0) or pt[0] > max(x_out0)) and (pt[0] < min(x_out1) or pt[0] > max(x_out1))
+                           or (pt[1] < min(y_out0) or pt[1] > max(y_out0)) and (pt[1] < min(y_out1) or pt[1] > max(y_out1))]
+        
         return center_pt

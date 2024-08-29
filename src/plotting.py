@@ -1,4 +1,5 @@
 # By Marshall Saltz
+from matplotlib.patches import Rectangle
 import numpy as np
 import matplotlib.pyplot as plt
 from addict import Dict
@@ -61,14 +62,14 @@ class Plot:
         insidey = data.area_outline_y
         width = data.width
         for pt in self.center_pts:
-            ax.scatter(pt[0], pt[1], color="red")
+            ax.scatter(pt[0], pt[1], color="gray")
+        # plot reached center points
+        ax.scatter(insidex, insidey, color="green")
         # outline of each finger's reachable space
         for pt in data.coord_space_right:
-            ax.scatter(pt[0], pt[1], color="blue")
+            ax.scatter(pt[0], pt[1], color="white", alpha=0.2)
         for pt in data.coord_space_left:
-            ax.scatter(pt[0], pt[1], color="blue")
-        # plot reached center points
-        ax.scatter(insidex, insidey, color="purple")
+            ax.scatter(pt[0], pt[1], color="white", alpha=0.2)
         ax.set_aspect('equal')
         ax.set_title("Area Test")
         ax.set_xlabel("X Position (meters)")
@@ -88,16 +89,16 @@ class Plot:
         width = data.width
         # scatter all points
         for pt in self.center_pts:
-            ax.scatter(pt[0], pt[1], color="red")
-        # plot outline
-        for pt in data.coord_space_right:
-            ax.scatter(pt[0], pt[1], color="blue")
-        for pt in data.coord_space_left:
-            ax.scatter(pt[0], pt[1], color="blue")
+            ax.scatter(pt[0], pt[1], color="gray")
         idx =  data.straight_data
         # scatter reached straight center points
         for p in idx:
-             ax.scatter(self.center_pts[p][0], self.center_pts[p][1], color='green')        
+             ax.scatter(self.center_pts[p][0], self.center_pts[p][1], color='green')      
+        # plot outline
+        for pt in data.coord_space_right:
+            ax.scatter(pt[0], pt[1], color="white", alpha=0.2)
+        for pt in data.coord_space_left:
+            ax.scatter(pt[0], pt[1], color="white", alpha=0.2)  
         ax.set_aspect('equal')
         ax.set_title("Center Points of Reached Horizontal Coordinates")
         ax.set_xlabel("X Position (meters)")
@@ -113,20 +114,20 @@ class Plot:
             data - data to plot
         """
         fig, ax = plt.subplots( nrows=1, ncols=1 )
-        width = data.width
         # plot workspace
         for pt in self.center_pts:
-            ax.scatter(pt[0], pt[1], color="red")
-        # plot outline
-        for pt in data.coord_space_right:
-            ax.scatter(pt[0], pt[1], color="blue")
-        for pt in data.coord_space_left:
-            ax.scatter(pt[0], pt[1], color="blue")
+            ax.scatter(pt[0], pt[1], color="gray")
         # plot reached angles
         x = data.angle_data.centersx
         y = data.angle_data.centersy
         count = data.angle_data.count
         a = ax.scatter(x, y, c=count, cmap='viridis', edgecolors='none')
+        # plot outline
+        for pt in data.coord_space_right:
+            ax.scatter(pt[0], pt[1], color="white", alpha = 0.2)
+        for pt in data.coord_space_left:
+            ax.scatter(pt[0], pt[1], color="white", alpha = 0.2)
+
         plt.colorbar(a, label="Amount of Angles Reached") 
         ax.set_title("Center Points of Reached Angles")
         ax.set_xlabel("X Position (meters)")
@@ -156,14 +157,27 @@ class Plot:
         width = data.width
         
         self.center_pts = [[x, y] for x in np.linspace(bottom_x, top_x, num=row_points) for y in np.linspace(bottom_y, top_y, num=column_points)]
-        for pt in self.center_pts:
-            if pt[0] < width/2 and pt[0] > -abs(width)/2 and pt[1] <0:
-                self.center_pts.remove(pt)
-            elif (pt[0] < min(x_out0) or pt[0] > max(x_out0)) and (pt[0] < min(x_out1) or pt[0] > max(x_out1)):
-                self.center_pts.remove(pt)
-            elif (pt[1] < min(y_out0) or pt[1] > max(y_out0)) and (pt[1] < min(y_out1) or pt[1] > max(y_out1)):
-                self.center_pts.remove(pt)
-    
+        self.center_pts = [pt for pt in self.center_pts if not ( pt[0] < width/2 and pt[0] > -abs(width)/2 and pt[1] <0) or (pt[0] < min(x_out0) or pt[0] > max(x_out0)) and (pt[0] < min(x_out1) or pt[0] > max(x_out1))
+                           or (pt[1] < min(y_out0) or pt[1] > max(y_out0)) and (pt[1] < min(y_out1) or pt[1] > max(y_out1))]
+
+
+
+def get_data(filename, gen):
+    """
+    Gets data from a json. Since it saves every interval, it uses that info to get the file.
+    Parameters:
+        filename - file from which to retreive data
+        gen - generation number
+    Returns:
+        data - data from file (list form)
+    """
+    data = []
+    for i in range(gen):
+        if i % params.interval == 0 and i != 0:
+            with open(f"../output/{filename}{i}.json", mode="r") as p:
+                data.extend(json.load(p))
+    return data    
+
 
 def plot_fitness(generational_fitness, generations):
         """
@@ -180,9 +194,10 @@ def plot_fitness(generational_fitness, generations):
         for i in range(generations):
             epochs.append(i)
         plt.xlabel("Generation")
-        plt.ylabel("Fitness")
-        plt.title("Max fitness of each generation")
+        plt.ylabel("Fitness Score")
+        plt.title("Maximum Coarse Fitness Score of Each Generation")
         plt.plot(epochs, generational_fitness, color='blue', linestyle='solid')
+        plt.text(50, max(generational_fitness) + max(generational_fitness)/3, f'Overall Maximum Fitness Score: {max(generational_fitness)}', bbox={'facecolor': 'blue', 'alpha': 0.5, 'pad': 10})
         plt.savefig(f"../output/fitness_trend_{params.flag}")
         with open(f"../output/generational_{params.flag}.json", mode="w") as resultsFile:
             new_j = json.dumps(list(zip(epochs, generational_fitness)))
@@ -208,34 +223,115 @@ def test(dicList, precision):
     return fitnesses
 
 
-#######################Currently generating new plots for angle_5000_2
-if __name__ == "__main__":
-    fitnesses = []
-    precision = params.precision2
-    ls = [
-        Dict({'finger_1': {'num_segs': 4}, 'ratio': {'segs': {'finger_1': [42, 13, 45], 'finger_0': [53, 1, 46]}, 'finger_0': 7, 'finger_1': 7}, 'finger_0': {'num_segs': 4}, 'length': {'palm': 0.05237, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_1_1522_1w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [55, 2, 43], 'finger_1': [45, 13, 42]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05135, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_1683_0eo_eo'}),
-        Dict({'name': 'hand_mut_gen_2170_8', 'finger_0': {'num_segs': 4}, 'finger_1': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [47, 8, 45], 'finger_1': [47, 13, 40]}, 'finger_0': 7, 'finger_1': 7}, 'length': {'palm': 0.05069, 'finger_0': 0.144, 'finger_1': 0.144}}),
-        Dict({'finger_1': {'num_segs': 4}, 'ratio': {'segs': {'finger_1': [45, 7, 48], 'finger_0': [45, 15, 40]}, 'finger_0': 7, 'finger_1': 7}, 'finger_0': {'num_segs': 4}, 'length': {'palm': 0.05069, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_1_2247_4w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [46, 17, 37], 'finger_1': [47, 13, 40]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05189, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_2520_3w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [51, 11, 38], 'finger_1': [45, 13, 42]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05135, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_2577_2eo_eo'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [53, 4, 43], 'finger_1': [42, 13, 45]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05177, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_2828_3eo_eo'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [43, 14, 43], 'finger_1': [46, 10, 44]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05177, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_2865_1eo_eo'}),
-        Dict({'finger_1': {'num_segs': 4}, 'ratio': {'segs': {'finger_1': [47, 9, 44], 'finger_0': [51, 8, 41]}, 'finger_0': 7, 'finger_1': 7}, 'finger_0': {'num_segs': 4}, 'length': {'palm': 0.05177, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_1_3028_0w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [50, 4, 46], 'finger_1': [47, 13, 40]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05019, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_3264_2w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [52, 1, 47], 'finger_1': [44, 12, 44]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05176, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_3286_1eo_eo'}),
-        Dict({'finger_1': {'num_segs': 4}, 'ratio': {'segs': {'finger_1': [44, 16, 40], 'finger_0': [50, 4, 46]}, 'finger_0': 7, 'finger_1': 7}, 'finger_0': {'num_segs': 4}, 'length': {'palm': 0.05227, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_1_3301_1w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [50, 6, 44], 'finger_1': [47, 13, 40]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05019, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_3502_0w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [46, 11, 43], 'finger_1': [47, 13, 40]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05071, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_3594_3w_s'}),
-        Dict({'finger_1': {'num_segs': 4}, 'ratio': {'segs': {'finger_1': [49, 3, 48], 'finger_0': [51, 8, 41]}, 'finger_0': 7, 'finger_1': 7}, 'finger_0': {'num_segs': 4}, 'length': {'palm': 0.05019, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_1_3647_3w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [56, 2, 42], 'finger_1': [47, 13, 40]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05069, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_3775_1w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [43, 11, 46], 'finger_1': [47, 13, 40]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05152, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_4400_2w_s'}),
-        Dict({'finger_1': {'num_segs': 4}, 'ratio': {'segs': {'finger_1': [43, 9, 48], 'finger_0': [55, 2, 43]}, 'finger_0': 7, 'finger_1': 7}, 'finger_0': {'num_segs': 4}, 'length': {'palm': 0.05019, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_1_4609_3w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [51, 10, 39], 'finger_1': [47, 13, 40]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.0505, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_4624_2w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [51, 10, 39], 'finger_1': [47, 13, 40]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05205, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_4841_1w_s'}),
-        Dict({'finger_0': {'num_segs': 4}, 'ratio': {'segs': {'finger_0': [46, 9, 45], 'finger_1': [47, 13, 40]}, 'finger_0': 7, 'finger_1': 7}, 'finger_1': {'num_segs': 4}, 'length': {'palm': 0.05019, 'finger_0': 0.144, 'finger_1': 0.144}, 'name': 'child_0_4862_1w_s'})
-    ]
-    fitnesses = test(ls, 5001, precision)
-    for l in ls:
-        p = Plot(l["name"], precision)
-        p.main()
+def plot_palm_widths(gen):
+    """
+    Plots palm widths versus scoring.
+    Parameters:
+        gen - number of generations
+    """
+    ls =[]
+    sortedScoring = []
+    sortedScoring.extend(get_data("sortedScoring", gen))
+    with open("../output/totallistfile.json") as f:
+        ls.extend(json.load(f))
+    newlist = sorted(ls, key=lambda d:d['length']['palm'])
+    palm_scores_dict = Dict()
+    palm_max_score = []
+    palm_avg_score = []
+    width_list = []
+    count = 0
+    
+    for pair in reversed(sortedScoring):
+        for element in newlist:
+            if count >= 20:
+                break
+            if element['name'] +".json" == pair[1]:
+                width = element['length']['palm']
+                if width not in palm_scores_dict:
+                    palm_scores_dict[width] = []
+                    count += 1
+                palm_scores_dict[width].append(pair[0])
+    for width, score, in palm_scores_dict.items():
+        palm_max_score.append(max(score))
+        palm_avg_score.append(sum(score) / len(score))
+        width_list.append(width)
+    fig, ax = plt.subplots()
+    w = 0.25
+    bar_len_1 = np.arange(len(palm_avg_score))
+    bar2 = [n + w for n in bar_len_1]
+    plt.bar(bar_len_1, palm_avg_score, color ='green', width = w, edgecolor ='none', label ='Average Score') 
+    plt.bar(bar2, palm_max_score, color ='blue', width = w, edgecolor ='none', label ='Maximum Score') 
+    ax.set_ylabel('Fitness Score')
+    ax.set_xlabel('Palm Width (mm)')
+    ax.set_title(f'Palm Widths in Comparison to Fitness Scores')
+    plt.xticks((bar2 + bar_len_1)/2, width_list)
+    ax.legend()
+    ax.set_ylim(0, max(max(palm_avg_score), max(palm_max_score))+10)
+    fig.set_size_inches(18.5, 10.5)
+    plt.savefig(f"../output/palm_widths_{params.flag}")
+
+def get_top(sortedScoring):
+    """
+    Returns top grippers.
+    Parameters:
+        sortedScoring - list of grippers and their scores sorted by score in ascending order
+    Returns:
+        top - list of top grippers and their scores
+        top_names - just the grippers' names
+    """
+    top = []
+    count = 0
+    for d in reversed(range(len(sortedScoring))):
+        if sortedScoring[d] not in top:
+            top.append(sortedScoring[d])
+            count += 1
+        if count > params.winner_count:
+            break
+    top_names = list(map(lambda x:x[1].split('.')[0], top))
+    return top, top_names
+
+def plot_seg_percents(gen, finger):
+    """
+    Plots segment percentages versus scores. finger_1
+    is separate from finger_0.
+    Parameters:
+        gen - generations run
+        finger - which finger to plot
+    """
+    ls =[]
+    sortedScoring = []
+    sortedScoring.extend(get_data("sortedScoring", gen))
+    sortedScoring = sorted(sortedScoring, key = lambda x: float(x[0]))
+    top_scores, top_names = get_top(sortedScoring)
+    with open("../output/totallistfile.json") as f:
+        ls.extend(json.load(f))
+    segs_0 = []
+    segs_1 = []
+    segs_2 = []
+    for name in top_names:
+        for element in ls:    
+            if element['name'] == name:
+                percents = element['ratio']['segs'][finger]
+                segs_0.append(percents[0])
+                segs_1.append(percents[1])
+                if len(percents) < 3:
+                    segs_2.append(0)
+                else:
+                    segs_2.append(percents[2])
+                break
+    fig, ax = plt.subplots()
+    w = 0.25
+    bar_len_1 = np.arange(len(segs_0))
+    bar2 = [n + w for n in bar_len_1]
+    bar3 = [n + w for n in bar2]
+    plt.bar(bar_len_1, segs_0, color ='green', width = w, edgecolor ='none', label ='Segment 0') 
+    plt.bar(bar2, segs_1, color ='blue', width = w, edgecolor ='none', label ='Segment 1') 
+    plt.bar(bar3, segs_2, color ='indigo', width = w, edgecolor ='none', label ='Segment 2') 
+    ax.set_ylabel('Segment Percentage')
+    ax.set_xlabel('Fitness Score')
+    ax.set_title(f'{finger} Segment Percentages in Comparison to Fitness Scores')
+    plt.xticks(bar2, [x[0] for x in top_scores])
+    ax.legend()
+    ax.set_ylim(0, 100)
+    fig.set_size_inches(18.5, 10.5)
+    plt.savefig(f"../output/{finger}_Segments_{params.flag}")
