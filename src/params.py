@@ -24,10 +24,10 @@ radius - distance of each finger from center point
 #flag = "area"
 
 # Angle test:
-flag = "angle"
+#flag = "angle"
 
 # Straight test:
-#flag = "straight"
+flag = "straight"
 
 precision1 = 0.01
 precision2 = 0.005

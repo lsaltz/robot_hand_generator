@@ -169,7 +169,11 @@ class WorkSpace_Test:
         theta1 = np.pi * theta1 / 180
         theta2 = np.pi * theta2 / 180
         theta3 = np.pi * theta3 / 180
-
+        
+        # joint offset
+        l1 = l1 + 0.0108
+        l2 = l2 + 0.0108
+        l3 = l3 + 0.0108
         # rotation offset
         val = 90 * np.pi/180
         

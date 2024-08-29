@@ -26,7 +26,7 @@ if __name__ == "__main__":
                 break
     fitnesses = plotting.test(dicsList, params.precision2)
     first = max(fitnesses, key=lambda item:item[0])[1].split(".")[0]
-    ea.write_to_file(dicsList, first, fitnesses, top_names, f"fine_{params.flag}")
+    ea.write_to_file(dicsList, first, fitnesses, top_names, f"{params.flag}")
     for i in dicsList:
         p = plotting.Plot(i["name"], params.precision2)
         p.main()
