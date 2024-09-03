@@ -7,7 +7,7 @@ from addict import Dict
 """
 Set test you wish to run on output hands in params and run this file
 as the main file. This will display the results of running any test 
-you wish on existing grippers.
+you wish on existing winning grippers.
 """
 if __name__ == "__main__":
     ls =[]

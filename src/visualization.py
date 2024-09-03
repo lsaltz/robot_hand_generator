@@ -24,9 +24,6 @@ import numpy as np
 class Visualize_Sim():
     """
     Class for visualizing gripper tests.
-    To change which gripper is visualized, go to
-    the bottom of this file and change the gripper name
-    and run this file as the main one.
     Not really applicable to area test.
     """
 
