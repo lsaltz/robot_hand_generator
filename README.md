@@ -2,9 +2,15 @@
 # robot_hand_generator_MLS: evolutionary algorithm edition
 A tool used to generate an optimal two-fingered gripper design for grasping an object of a certain width. Achieves this by using an evolutionary algorithm to find the design, and runs three different tests whose results can be compared.
 This tool can run three different tests and generates the best two-fingered gripper as found by each of those tests. The tests are:
-- Straight (default): Number of point pairs separated horizontally by width
+
 - Angle: The number of reachable angles around a center point
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/angle/angles_visual.png?raw=true)
+
 - Area: Number of points within the overlapping workspaces of both fingers
+  
+- Straight (default): Number of point pairs separated horizontally by width
+![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/straight/straight_visual.png?raw=true)
+
 After testing at a coarse precision, the program takes the top few hands and tests them at a finer precision.
 
 Parameters are in src/params.py and may be adjusted. 
@@ -53,8 +59,7 @@ Parameters are in src/params.py and may be adjusted.
     python3 ea.py
     ```
     and specify for how many generations you would like to run it for. The more you enter, the longer it will take. For example, 5000 generations on my desktop takes 2-3 days.
-    
-   
+
 ## output Folder:
 
 After ea.py finishes running, it will send the data it gathered from each test on the top few grippers to two different results files located in ~/robot_hand_generator_MLS/output and ~/robot_hand_generator_MLS/points. In this folder you can find:
