@@ -1,17 +1,21 @@
 [![DOI](https://zenodo.org/badge/449414021.svg)](https://zenodo.org/badge/latestdoi/449414021)
 # robot_hand_generator_MLS: evolutionary algorithm edition
-A tool used to generate an optimal two-fingered gripper design for grasping an object of a certain width. Achieves this by using an evolutionary algorithm to find the design, and runs three different tests whose results can be compared.
+A tool used to generate an optimal two-fingered gripper design for grasping an object of a certain width. Achieves this by using an evolutionary algorithm to find the design, and can run three different tests whose results can be compared.
 This tool can run three different tests and generates the best two-fingered gripper as found by each of those tests. The tests are:
 
-- Angle: The number of reachable angles around a center point
+## Angle
+The number of reachable angles around a center point
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/angle/angles_visual.png?raw=true)
 
-- Area: Number of points within the overlapping workspaces of both fingers
-  
-- Straight (default): Number of point pairs separated horizontally by width
+## Straight (default) 
+Number of point pairs separated horizontally by width
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/straight/straight_visual.png?raw=true)
 
-After testing at a coarse precision, the program takes the top few hands and tests them at a finer precision.
+## Area 
+Number of points within the overlapping workspaces of both fingers
+
+  
+The test type can be specified in the params.py file. After testing at a coarse precision, the program takes the top few hands and tests them at a finer precision. To test each hand, the program generates the reachable area outline of each finger via the Denavit-Hartenberg parameters. It uses the Shapely library to determine if the points it is testing the reachability of fall within the outlines.
 
 Parameters are in src/params.py and may be adjusted. 
   
