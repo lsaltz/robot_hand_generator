@@ -6,13 +6,13 @@ from addict import Dict
 import json
 import params
 import test as nt
+import collections
 
 
 class Plot:
     """
     Takes care of plotting data.
     """
-
     def __init__(self, name, precision):
         """
         Initializes class.
@@ -209,7 +209,7 @@ def test(dicList, precision):
     Runs test on grippers.
     Parameters:
         dicList - list of dictionaries to test
-        precision - space in between points (mm)
+        precision - space in between points
     Returns:
         fitnesses - list of test results
     """
@@ -251,7 +251,8 @@ def plot_palm_widths(gen):
                     palm_scores_dict[width] = []
                     count += 1
                 palm_scores_dict[width].append(pair[0])
-    for width, score, in palm_scores_dict.items():
+    od = collections.OrderedDict(sorted(palm_scores_dict.items()))
+    for width, score, in od.items():
         palm_max_score.append(max(score))
         palm_avg_score.append(sum(score) / len(score))
         width_list.append(width)
@@ -262,7 +263,7 @@ def plot_palm_widths(gen):
     plt.bar(bar_len_1, palm_avg_score, color ='green', width = w, edgecolor ='none', label ='Average Score') 
     plt.bar(bar2, palm_max_score, color ='blue', width = w, edgecolor ='none', label ='Maximum Score') 
     ax.set_ylabel('Fitness Score')
-    ax.set_xlabel('Palm Width (mm)')
+    ax.set_xlabel('Palm Width (m)')
     ax.set_title(f'Palm Widths in Comparison to Fitness Scores')
     plt.xticks((bar2 + bar_len_1)/2, width_list)
     ax.legend()

@@ -49,8 +49,7 @@ class First_Generation:
         Generates random data for an entirely new gripper.
         Returns:
             hand_data - newly generated hand data
-        """
-          
+        """  
         file_name = "hand_init" +  '_gen_' + str(self.generation) + "_" + str(self.n)
 
         self.hand_data.name = file_name
