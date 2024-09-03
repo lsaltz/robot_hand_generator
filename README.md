@@ -55,15 +55,19 @@ Parameters are in src/params.py and may be adjusted.
     and specify for how many generations you would like to run it for. The more you enter, the longer it will take. For example, 5000 generations on my desktop takes 2-3 days.
     
    
-## What the outputs mean:
+## output Folder:
 
-After ea.py finishes running, it will send the data it gathered from each test on the top few grippers to two different results files located in ~/robot_hand_generator_MLS/output.
+After ea.py finishes running, it will send the data it gathered from each test on the top few grippers to two different results files located in ~/robot_hand_generator_MLS/output and ~/robot_hand_generator_MLS/points. In this folder you can find:
+- charts of the reachable space of the gripper when run through the test set in params
+- figure depicting the changes in maximum fitness score per generation
+- figures comparing segment lengths to fitness score
+- palm width to fitness score figure
+- brief summary of the results as a text file.
 
-In the output folder you can also find a graph of the overall fitness trend and charts of the test conducted on the top few hands.
-
+Please see Results.md for the current results.
 
 ## Additional Notes:
-Requires numpy 1.25.0, you may have to downgrade numpy version.
+Requires numpy 1.25.0, you may have to downgrade your numpy version.
 If you wish to run this software more than once, clear your outputs, hand_archive, and points folders. If you run into issues with MESA and OpenGL, add the following to ~/.bashrc:
 ```
 export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
