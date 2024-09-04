@@ -5,16 +5,18 @@ This tool can run three different tests and generates the best two-fingered grip
 
 ## Angle
 The number of reachable angles around a center point
+
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/angle/angles_visual.png?raw=true)
 
 ## Straight (default) 
 Number of point pairs separated horizontally by width
+
 ![alt text](https://github.com/lsaltz/robot_hand_generator_MLS/blob/main/imgs/straight/straight_visual.png?raw=true)
 
 ## Area 
 Number of points within the overlapping workspaces of both fingers
 
-  
+ ---------------------------------------------------------------------------------------------- 
 The test type can be specified in the params.py file. After testing at a coarse precision, the program takes the top few hands and tests them at a finer precision. To test each hand, the program generates the reachable area outline of each finger via the Denavit-Hartenberg parameters. It uses the Shapely library to determine if the points it is testing the reachability of fall within the outlines.
 
 Parameters are in src/params.py and may be adjusted. 
