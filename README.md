@@ -52,7 +52,7 @@ Parameters are in src/params.py and may be adjusted.
     ```
 
     * This will set up the environment.
-    
+   
 2. After the environment has finished setting up (this will take some time), run the evolutionary algorithm, open:
 
     ```console
@@ -76,6 +76,19 @@ After ea.py finishes running, it will send the data it gathered from each test o
 - brief summary of the results as a text file.
 
 Please see Results.md for the current results.
+
+## Further Instructions:
+If you wish to visualize the testing, run:
+```console
+python3 visualization.py
+```
+to view the test set in params.py in simulation.
+
+To run further tests on the winners of a single test, change the desired test in params.py and run:
+
+```console
+python3 run_all_tests.py
+```
 
 ## Additional Notes:
 Requires numpy 1.25.0, you may have to downgrade your numpy version.
